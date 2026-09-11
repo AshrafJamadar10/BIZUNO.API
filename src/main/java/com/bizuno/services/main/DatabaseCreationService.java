@@ -75,4 +75,8 @@ public class DatabaseCreationService {
             throw new TenantDatabaseException("Failed to check database existence: " + dbName, null, dbName, e);
         }
     }
+
+    public boolean isDatabaseExists(String dbName) {
+        return databaseExists(dbName);
+    }
 }

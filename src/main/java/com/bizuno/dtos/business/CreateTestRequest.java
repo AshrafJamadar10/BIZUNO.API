@@ -1,4 +1,4 @@
-package com.bizuno.dtos.main;
+package com.bizuno.dtos.business;
 
 import lombok.Getter;
 import lombok.Setter;

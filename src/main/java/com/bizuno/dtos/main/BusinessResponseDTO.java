@@ -1,24 +1,19 @@
-package com.bizuno.models.main;
+package com.bizuno.dtos.main;
 
 import com.bizuno.constants.RegexPatterns;
-import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
 
+import java.util.Date;
 import java.util.UUID;
 
+@Setter
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
-@Entity
 @Builder
-@Table(name = "business")
-public class Business extends BaseEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+public class BusinessResponseDTO {
     private UUID businessId;
 
     @NotBlank(message = "Business name is required")
@@ -26,7 +21,6 @@ public class Business extends BaseEntity {
     private String businessName;
 
     @NotBlank(message = "Business code is required")
-    @Column(unique = true)
     private String businessCode;
 
     @NotBlank(message = "Email is required")
@@ -39,11 +33,11 @@ public class Business extends BaseEntity {
 
     private String logo;
 
-    @NotBlank(message = "Tenant ID is required")
-    @Column(name = "tenant_id",nullable = false, unique = true)
-    private String tenantId;
+    private Date createdDate;
 
-    @NotBlank(message = "Database name is required")
-    @Column(name = "db_name",nullable = false, unique = true)
-    private String dbName;
+    private boolean isActive;
+
+    private String plan;
+
+    private String ownerName;
 }

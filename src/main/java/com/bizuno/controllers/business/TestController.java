@@ -1,6 +1,6 @@
 package com.bizuno.controllers.business;
 
-import com.bizuno.dtos.main.CreateTestRequest;
+import com.bizuno.dtos.business.CreateTestRequest;
 import com.bizuno.models.business.Test;
 import com.bizuno.services.business.TestService;
 import lombok.AllArgsConstructor;

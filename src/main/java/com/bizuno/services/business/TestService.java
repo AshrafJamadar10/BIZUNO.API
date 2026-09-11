@@ -1,6 +1,6 @@
 package com.bizuno.services.business;
 
-import com.bizuno.dtos.main.CreateTestRequest;
+import com.bizuno.dtos.business.CreateTestRequest;
 import com.bizuno.models.main.Business;
 import com.bizuno.models.business.Test;
 import com.bizuno.repositories.main.BusinessRepository;

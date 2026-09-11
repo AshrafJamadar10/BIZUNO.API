@@ -8,4 +8,8 @@ import java.util.UUID;
 
 public interface BusinessRepository extends JpaRepository<Business, UUID> {
     Optional<Business> findByTenantId(String id);
+
+    boolean existsByBusinessCode(String businessCode);
+
+    boolean existsByTenantId(String tenantId);
 }
