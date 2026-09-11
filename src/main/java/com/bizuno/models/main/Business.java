@@ -19,11 +19,15 @@ public class Business {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private UUID businessId;
 
     @NotBlank(message = "Business name is required")
     @Pattern(regexp = RegexPatterns.REGEX_LETTERS_NUMBERS_AND_SPACES, message = "Business name should contain only letters, numbers, and spaces")
     private String businessName;
+
+    @NotBlank(message = "Business code is required")
+    @Column(unique = true)
+    private String businessCode;
 
     @NotBlank(message = "Email is required")
     @Pattern(regexp = RegexPatterns.REGEX_EMAIL, message = "Email should be valid")
@@ -32,6 +36,8 @@ public class Business {
     @NotBlank(message = "Phone number is required")
     @Pattern(regexp = RegexPatterns.REGEX_PHONE, message = "Phone number should be valid")
     private String phone;
+
+    private String logo;
 
     @NotBlank(message = "Tenant ID is required")
     @Column(name = "tenant_id",nullable = false, unique = true)
