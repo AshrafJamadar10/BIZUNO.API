@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/bizuno/api/business")
+@RequestMapping("/bizuno/business")
 @AllArgsConstructor
 public class BusinessController {
 

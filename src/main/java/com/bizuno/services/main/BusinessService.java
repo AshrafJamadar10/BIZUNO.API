@@ -5,10 +5,18 @@ import com.bizuno.constants.AppConstants;
 import com.bizuno.dtos.main.CreateBusinessRequestDTO;
 import com.bizuno.dtos.main.BusinessResponseDTO;
 import com.bizuno.dtos.main.CommonResponse;
+import com.bizuno.enums.ModelEnums;
+import com.bizuno.models.business.BusinessRole;
+import com.bizuno.models.business.BusinessUser;
 import com.bizuno.models.main.Business;
+import com.bizuno.repositories.business.BusinessRoleRepository;
+import com.bizuno.repositories.business.BusinessUserRepository;
 import com.bizuno.repositories.main.BusinessRepository;
+import com.bizuno.repositories.main.UserRepository;
 import com.bizuno.utils.Codes;
+import com.bizuno.utils.TenantTransactionalUtil;
 import com.bizuno.utils.UniqueCodeGenerator;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +24,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -31,19 +41,34 @@ public class BusinessService {
     private final BusinessRepository businessRepository;
     private final DatabaseCreationService databaseCreationService;
     private final BusinessDatabaseConfig businessDatabaseConfig;
+    private final UserRepository userRepository;
     private final Codes codes;
+    private final TenantTransactionalUtil tenantTransactionalUtil;
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Value("${packages-to-scan.business}")
     private String tenantPackagesToScan;
 
+    @Transactional
     public CommonResponse createBusiness(CreateBusinessRequestDTO createBusinessRequestDTO) {
         System.out.println("🚀 Starting tenant creation for: " + createBusinessRequestDTO.getBusinessName());
+
+        String email = createBusinessRequestDTO.getEmail();
+        String phone = createBusinessRequestDTO.getPhone();
         
         Business business = new Business();
         business.setBusinessName(createBusinessRequestDTO.getBusinessName());
         business.setEmail(createBusinessRequestDTO.getEmail());
         business.setPhone(createBusinessRequestDTO.getPhone());
         business.prePersist();
+
+        if (userRepository.findByEmailIgnoreCase(email).isPresent()) {
+            return new CommonResponse(AppConstants.STATUS_CONFLICT, String.format(AppConstants.MESSAGE_EXISTS, "Email"));
+        }
+
+        if (userRepository.findByPhoneNumber(phone).isPresent()) {
+            return new CommonResponse(AppConstants.STATUS_CONFLICT, String.format(AppConstants.MESSAGE_EXISTS, "Phone number"));
+        }
 
         String tenantId = UUID.randomUUID().toString();
         while (businessRepository.existsByTenantId(tenantId)){
@@ -75,7 +100,33 @@ public class BusinessService {
         );
         System.out.println("✅ EntityManagerFactory creation completed");
 
-        return new CommonResponse(AppConstants.STATUS_SUCCESS, String.format(AppConstants.MESSAGE_CREATED, "business"), getBusinessResponseDTO(savedBusiness));
+        return tenantTransactionalUtil.excecuteInTenantContext(business.getTenantId(), business.getDbName(), entityManager -> {
+            BusinessUserRepository businessUserRepository = tenantTransactionalUtil.getRepository(entityManager, BusinessUserRepository.class);
+            BusinessRoleRepository businessRoleRepository = tenantTransactionalUtil.getRepository(entityManager, BusinessRoleRepository.class);
+
+            BusinessRole role = BusinessRole.builder()
+                    .name("ADMIN")
+                    .description("Administrator role with full access")
+                    .type(ModelEnums.RoleType.BUSINESS.name())
+                    .title(ModelEnums.Titles.ADMIN.name())
+                    .build();
+
+            role = businessRoleRepository.save(role);
+
+            BusinessUser user = BusinessUser.builder()
+                    .email(email)
+                    .phoneNumber(phone)
+                    .firstName(createBusinessRequestDTO.getFirstName())
+                    .lastName(createBusinessRequestDTO.getLastName())
+                    .password(passwordEncoder.encode(createBusinessRequestDTO.getPassword()))
+                    .role(role)
+                    .build();
+
+            businessUserRepository.save(user);
+
+            return new CommonResponse(AppConstants.STATUS_SUCCESS, String.format(AppConstants.MESSAGE_CREATED, "business"), getBusinessResponseDTO(savedBusiness));
+        });
+
     }
 
     public CommonResponse updateBusiness(UUID businessId, @Valid CreateBusinessRequestDTO createBusinessRequestDTO) {

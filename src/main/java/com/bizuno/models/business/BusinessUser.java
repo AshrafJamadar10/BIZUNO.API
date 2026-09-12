@@ -1,4 +1,4 @@
-package com.bizuno.models.main;
+package com.bizuno.models.business;
 
 import com.bizuno.constants.RegexPatterns;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -13,15 +13,22 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
-@Table(name = "users")
+@Table(name = "business_users")
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class User extends BaseEntity {
-
+public class BusinessUser {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID userId;
+
+    @NotBlank(message = "First Name is required")
+    @Pattern(regexp = RegexPatterns.REGEX_LETTERS_AND_SPACES, message = "first name should contain only letters and spaces")
+    private String firstName;
+
+    @NotBlank(message = "Last Name is required")
+    @Pattern(regexp = RegexPatterns.REGEX_LETTERS_AND_SPACES, message = "last name should contain only letters and spaces")
+    private String lastName;
 
     @NotBlank(message = "Phone Number is required")
     @Column(unique = true)
@@ -38,11 +45,10 @@ public class User extends BaseEntity {
     private String password;
 
     @JsonIgnore
-    @Column(length = 1000)
     private String refreshToken;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "role_id", nullable = false)
+    @JoinColumn(name = "role_id")
     @JsonManagedReference
-    private Role role;
+    private BusinessRole role;
 }

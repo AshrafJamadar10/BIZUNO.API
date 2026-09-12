@@ -12,4 +12,6 @@ public interface BusinessRepository extends JpaRepository<Business, UUID> {
     boolean existsByBusinessCode(String businessCode);
 
     boolean existsByTenantId(String tenantId);
+
+    Optional<Business> findByBusinessCode(String businessCode);
 }

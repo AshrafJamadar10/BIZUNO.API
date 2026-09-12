@@ -19,6 +19,9 @@ public class GlobalExceptionHandler {
         response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
         response.put("error", "Tenant Database Error");
         response.put("message", ex.getMessage());
+        if (ex.getCause() != null && ex.getCause().getMessage() != null) {
+            response.put("details", ex.getCause().getMessage());
+        }
         response.put("tenantId", ex.getTenantId());
         response.put("databaseName", ex.getDatabaseName());
         
@@ -43,6 +46,9 @@ public class GlobalExceptionHandler {
         response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
         response.put("error", "Internal Server Error");
         response.put("message", ex.getMessage());
+        if (ex.getCause() != null && ex.getCause().getMessage() != null) {
+            response.put("details", ex.getCause().getMessage());
+        }
         
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }

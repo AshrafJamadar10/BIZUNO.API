@@ -54,52 +54,52 @@ public class Package extends BaseEntity {
     @Builder.Default
     private Boolean recommended = false;
 
-//    @OneToMany(mappedBy = "pack", cascade = CascadeType.ALL, orphanRemoval = true)
-//    @Builder.Default
-//    private Set<PackageFeature> features = new HashSet<>();
+    @OneToMany(mappedBy = "pack", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private Set<PackageFeature> features = new HashSet<>();
 
-//    @Builder.Default
-//    @ElementCollection(fetch = FetchType.EAGER)
-//    @CollectionTable( name = "package_scopes", joinColumns = @JoinColumn(name = "package_id"))
-//    @Column(name = "scope", nullable = false)
-//    private Set<String> scopes = new HashSet<>();
-//
-//    @Builder.Default
-//    @ElementCollection(fetch = FetchType.EAGER)
-//    @CollectionTable( name = "operations", joinColumns = @JoinColumn(name = "package_id"))
-//    @Column(name = "operation", nullable = false)
-//    private Set<String> operations = new HashSet<>();
+    @Builder.Default
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable( name = "package_scopes", joinColumns = @JoinColumn(name = "package_id"))
+    @Column(name = "scope", nullable = false)
+    private Set<String> scopes = new HashSet<>();
 
-    // Helper methods
-//    public void addFeature(String featureCode, String featureName, String description, int displayOrder) {
-//        PackageFeature feature = PackageFeature.builder()
-//                .packageFeatureCode(featureCode)
-//                .featureName(featureName)
-//                .description(description)
-//                .displayOrder(displayOrder)
-//                .pack(this)
-//                .build();
-//        features.add(feature);
-//    }
-//
-//    public void removeFeature(PackageFeature feature) {
-//        features.remove(feature);
-//        feature.setPack(null);
-//    }
+    @Builder.Default
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable( name = "operations", joinColumns = @JoinColumn(name = "package_id"))
+    @Column(name = "operation", nullable = false)
+    private Set<String> operations = new HashSet<>();
 
-//    public void addScope(String scope){
-//        scopes.add(scope);
-//    }
-//
-//    public void removeScope(String scope){
-//        scopes.remove(scope);
-//    }
-//
-//    public void addOperation(String operation){
-//        operations.add(operation);
-//    }
-//
-//    public void removeOperation(String operation){
-//        operations.remove(operation);
-//    }
+//     Helper methods
+    public void addFeature(String featureCode, String featureName, String description, int displayOrder) {
+        PackageFeature feature = PackageFeature.builder()
+                .packageFeatureCode(featureCode)
+                .featureName(featureName)
+                .description(description)
+                .displayOrder(displayOrder)
+                .pack(this)
+                .build();
+        features.add(feature);
+    }
+
+    public void removeFeature(PackageFeature feature) {
+        features.remove(feature);
+        feature.setPack(null);
+    }
+
+    public void addScope(String scope){
+        scopes.add(scope);
+    }
+
+    public void removeScope(String scope){
+        scopes.remove(scope);
+    }
+
+    public void addOperation(String operation){
+        operations.add(operation);
+    }
+
+    public void removeOperation(String operation){
+        operations.remove(operation);
+    }
 }
