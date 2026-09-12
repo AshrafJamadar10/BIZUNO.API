@@ -20,7 +20,7 @@ import java.util.UUID;
 public class User extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID userId;
 
     @NotBlank(message = "Phone Number is required")
@@ -41,7 +41,7 @@ public class User extends BaseEntity {
     private String refreshToken;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "role_id", referencedColumnName = "role_id")
+    @JoinColumn(name = "role_id")
     @JsonManagedReference
     private Role role;
 }

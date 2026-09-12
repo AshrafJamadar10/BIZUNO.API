@@ -20,8 +20,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class Role extends BaseEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "role_id")
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID roleId;
 
     @NotBlank(message = "Name is required")

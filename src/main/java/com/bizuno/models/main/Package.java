@@ -20,7 +20,7 @@ import java.util.UUID;
 public class Package extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID packageId;
 
     @NotBlank(message = "Name is required")

@@ -17,8 +17,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class RoleCrudPermission {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "crud_role_permission_id")
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID crudRolePermissionId;
 
     @NotBlank(message = "Scope is required")

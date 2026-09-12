@@ -151,18 +151,22 @@ public class BusinessService {
             word = word.replaceAll("[^a-zA-Z0-9]", "");
 
             if (word.equalsIgnoreCase("private")) {
-                word = "Pvt";
+                word = "pvt";
             } else if (word.equalsIgnoreCase("limited")) {
-                word = "Ltd";
-            } else if (!word.isEmpty()) {
-                word = Character.toUpperCase(word.charAt(0))
-                        + word.substring(1).toLowerCase();
+                word = "ltd";
+            } else {
+                word = word.toLowerCase();
             }
 
-            result.append(word);
+            if (!word.isEmpty()) {
+                if (!result.isEmpty()) {
+                    result.append("_");
+                }
+                result.append(word);
+            }
         }
 
-        return Character.toLowerCase(result.charAt(0)) + result.substring(1) + UniqueCodeGenerator.generateShortUuid();
+        return result + "_" + UniqueCodeGenerator.generateShortUuid().toLowerCase();
     }
 
     private BusinessResponseDTO getBusinessResponseDTO(Business business){
