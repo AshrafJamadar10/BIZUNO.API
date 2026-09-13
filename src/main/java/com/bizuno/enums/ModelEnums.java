@@ -76,12 +76,39 @@ public class ModelEnums {
     }
 
     public enum CrudPermissionScopes {
-        BUSINESS,
-        EMPLOYEE,
-        INVOICE,
-        INVENTORY;
+        DASHBOARD,
+        USERS,
+        WAREHOUSES,
+        CUSTOMERS,
+        PRODUCTS,
+        PURCHASES,
+        INVENTORY,
+        SALES_AND_INVOICES,
+        PAYMENTS,
+        SUPPLIERS,
+        REPORTS,
+        SETTINGS,
+        STAFF,
+        ATTENDANCE,
+        ROLES,
+        NOTIFICATIONS,
+        AUDIT_LOGS,
+        API_ACCESS,
+        CUSTOM_BRANDING,
+        PRIORITY_SUPPORT;
 
         public static CrudPermissionScopes[] getAllValues() {
+            return values();
+        }
+    }
+
+    public enum FeatureLimitType {
+        NONE,
+        COUNT,
+        AMOUNT,
+        STORAGE;
+
+        public static FeatureLimitType[] getAllValues() {
             return values();
         }
     }

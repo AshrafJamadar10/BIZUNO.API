@@ -39,5 +39,7 @@ public class BusinessResponseDTO {
 
     private String plan;
 
-    private String ownerName;
+    private String firstName;
+
+    private String lastName;
 }

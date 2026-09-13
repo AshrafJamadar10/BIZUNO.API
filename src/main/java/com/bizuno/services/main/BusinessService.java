@@ -9,9 +9,11 @@ import com.bizuno.enums.ModelEnums;
 import com.bizuno.models.business.BusinessRole;
 import com.bizuno.models.business.BusinessUser;
 import com.bizuno.models.main.Business;
+import com.bizuno.models.main.Subscription;
 import com.bizuno.repositories.business.BusinessRoleRepository;
 import com.bizuno.repositories.business.BusinessUserRepository;
 import com.bizuno.repositories.main.BusinessRepository;
+import com.bizuno.repositories.main.SubscriptionRepository;
 import com.bizuno.repositories.main.UserRepository;
 import com.bizuno.utils.Codes;
 import com.bizuno.utils.TenantTransactionalUtil;
@@ -25,7 +27,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -44,6 +45,7 @@ public class BusinessService {
     private final UserRepository userRepository;
     private final Codes codes;
     private final TenantTransactionalUtil tenantTransactionalUtil;
+    private final SubscriptionRepository subscriptionRepository;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Value("${packages-to-scan.business}")
@@ -221,6 +223,8 @@ public class BusinessService {
     }
 
     private BusinessResponseDTO getBusinessResponseDTO(Business business){
+        Optional<Subscription> subscription = subscriptionRepository.findCurrentSubscriptionByBusinessCode(business.getBusinessCode());
+
         return BusinessResponseDTO.builder()
                 .businessId(business.getBusinessId())
                 .businessName(business.getBusinessName())
@@ -230,8 +234,9 @@ public class BusinessService {
                 .logo(business.getLogo())
                 .createdDate(business.getCreatedDate())
                 .isActive(business.getIsActive())
-//                .plan(business.getPlan())
-//                .ownerName(business.getOwnerName())
+                .plan(subscription.map(value -> value.getPack().getName()).orElse(null))
+                .firstName(business.getFirstName())
+                .lastName(business.getLastName())
                 .build();
     }
 }

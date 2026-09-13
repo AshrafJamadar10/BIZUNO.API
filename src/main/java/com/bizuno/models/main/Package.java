@@ -13,7 +13,10 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
-@Table(name = "packages")
+@Table(name = "packages", indexes = {
+        @Index(name = "idx_package_name", columnList = "name"),
+        @Index(name = "idx_package_billing_period", columnList = "billingPeriod")
+})
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -23,83 +26,161 @@ public class Package extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID packageId;
 
-    @NotBlank(message = "Name is required")
+    @NotBlank(message = "Package name is required")
+    @Column(nullable = false, length = 100)
     private String name;
 
     @NotBlank(message = "Description is required")
-    @Column(length = 500)
+    @Column(nullable = false, length = 500)
     private String description;
 
     @NotNull(message = "Base price is required")
-    @Min(value = 0, message = "Base price must be greater than or equal to 0")
+    @DecimalMin(value = "0.0", inclusive = true, message = "Base price must be greater than or equal to 0")
+    @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal basePrice;
 
     @NotNull(message = "Billing period is required")
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private ModelEnums.PackageBillingPeriod billingPeriod;
 
     @NotNull(message = "Package days is required")
     @Min(value = 0, message = "Package days must be greater than or equal to 0")
+    @Column(nullable = false)
     private Integer packageDays;
 
     @NotNull(message = "Trial days is required")
     @Min(value = 0, message = "Trial days must be greater than or equal to 0")
+    @Column(nullable = false)
     private Integer trialDays;
 
-    private BigDecimal setupFee;
+    @Builder.Default
+    @DecimalMin(value = "0.0", inclusive = true, message = "Setup fee must be greater than or equal to 0")
+    @Column(precision = 10, scale = 2)
+    private BigDecimal setupFee = BigDecimal.ZERO;
 
     @Builder.Default
+    @Column(nullable = false)
     private Integer displayOrder = 0;
 
     @Builder.Default
+    @Column(nullable = false)
     private Boolean recommended = false;
 
     @OneToMany(mappedBy = "pack", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private Set<PackageFeature> features = new HashSet<>();
 
-    @Builder.Default
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable( name = "package_scopes", joinColumns = @JoinColumn(name = "package_id"))
-    @Column(name = "scope", nullable = false)
-    private Set<String> scopes = new HashSet<>();
+    @PrePersist
+    @PreUpdate
+    public void normalizePackageData() {
+        if (this.name != null) {
+            this.name = this.name.trim();
+        }
+        if (this.description != null) {
+            this.description = this.description.trim();
+        }
+        if (this.basePrice == null) {
+            this.basePrice = BigDecimal.ZERO;
+        }
+        if (this.setupFee == null) {
+            this.setupFee = BigDecimal.ZERO;
+        }
+        if (this.packageDays == null) {
+            this.packageDays = 0;
+        }
+        if (this.trialDays == null) {
+            this.trialDays = 0;
+        }
+        if (this.displayOrder == null) {
+            this.displayOrder = 0;
+        }
+        if (this.recommended == null) {
+            this.recommended = false;
+        }
+        if (this.features != null) {
+            this.features.forEach(feature -> {
+                if (feature.getPack() == null) {
+                    feature.setPack(this);
+                }
+            });
+        }
+    }
 
-    @Builder.Default
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable( name = "operations", joinColumns = @JoinColumn(name = "package_id"))
-    @Column(name = "operation", nullable = false)
-    private Set<String> operations = new HashSet<>();
-
-//     Helper methods
-    public void addFeature(String featureCode, String featureName, String description, int displayOrder) {
+    public void addFeature(String featureCode, String featureName, String description,
+                          ModelEnums.CrudPermissionScopes scope, Set<String> operations,
+                          ModelEnums.FeatureLimitType limitType, Integer limitValue,
+                          String unit, Boolean isEnabled, int displayOrder) {
         PackageFeature feature = PackageFeature.builder()
                 .packageFeatureCode(featureCode)
                 .featureName(featureName)
                 .description(description)
+                .scope(scope.name())
                 .displayOrder(displayOrder)
+                .limitType(limitType != null ? limitType : ModelEnums.FeatureLimitType.NONE)
+                .limitValue(limitValue != null ? limitValue : 0)
+                .unit(unit)
+                .isEnabled(isEnabled != null ? isEnabled : true)
                 .pack(this)
                 .build();
-        features.add(feature);
+
+        if (operations != null) {
+            operations.forEach(feature::addOperation);
+        }
+
+        this.features.add(feature);
     }
 
     public void removeFeature(PackageFeature feature) {
-        features.remove(feature);
+        if (feature == null) {
+            return;
+        }
+        this.features.remove(feature);
         feature.setPack(null);
     }
 
-    public void addScope(String scope){
-        scopes.add(scope);
+    public void clearFeatures() {
+        if (this.features == null) {
+            return;
+        }
+        this.features.forEach(feature -> feature.setPack(null));
+        this.features.clear();
     }
 
-    public void removeScope(String scope){
-        scopes.remove(scope);
+    public Set<String> getScopes() {
+        if (this.features == null || this.features.isEmpty()) {
+            Set<String> defaultScopes = new HashSet<>();
+            defaultScopes.add("DASHBOARD");
+            defaultScopes.add("CUSTOMERS");
+            defaultScopes.add("INVENTORY");
+            defaultScopes.add("EMPLOYEES");
+            return defaultScopes;
+        }
+
+        Set<String> derivedScopes = new HashSet<>();
+        for (PackageFeature feature : this.features) {
+            if (feature == null || feature.getScope() == null) {
+                continue;
+            }
+            derivedScopes.add(feature.getScope());
+        }
+
+        return derivedScopes.isEmpty() ? Set.of() : derivedScopes;
     }
 
-    public void addOperation(String operation){
-        operations.add(operation);
-    }
+    public Set<String> getOperations() {
+        if (this.features == null || this.features.isEmpty()) {
+            return Set.of("CREATE", "READ", "UPDATE", "DELETE");
+        }
 
-    public void removeOperation(String operation){
-        operations.remove(operation);
+        Set<String> derivedOperations = new HashSet<>();
+        for (PackageFeature feature : this.features) {
+            if (feature == null || feature.getOperations() == null) {
+                continue;
+            }
+            derivedOperations.addAll(feature.getOperations());
+        }
+
+        return derivedOperations.isEmpty() ? Set.of() : derivedOperations;
     }
 }
