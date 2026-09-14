@@ -31,11 +31,11 @@ public class Subscription extends BaseEntity{
     private ModelEnums.SubscriptionStatus subscriptionStatus = ModelEnums.SubscriptionStatus.ACTIVE;
 
     @NotNull(message = "Start date is required")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
+    @JsonFormat(pattern = "dd-MM-yyyy HH:mm:ss")
     private LocalDateTime startDate;
 
     @NotNull(message = "End date is required")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
+    @JsonFormat(pattern = "dd-MM-yyyy HH:mm:ss")
     private LocalDateTime endDate;
 
     private LocalDateTime trialEndDate;
@@ -57,7 +57,6 @@ public class Subscription extends BaseEntity{
     @Builder.Default
     private Boolean autoRenew = true;
 
-    private Long previousSubscriptionId;
     private String cancellationReason;
 
     // Relationships

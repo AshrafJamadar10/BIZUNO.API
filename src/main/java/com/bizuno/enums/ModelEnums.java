@@ -8,6 +8,15 @@ public class ModelEnums {
         public static PackageBillingPeriod[] getAllValues(){
             return values();
         }
+
+        public int getMonths() {
+            return switch (this) {
+                case MONTHLY -> 1;
+                case QUARTERLY -> 3;
+                case YEARLY -> 12;
+                case LIFETIME, ONE_TIME -> 1200;
+            };
+        }
     }
 
     public enum AuditAction {
