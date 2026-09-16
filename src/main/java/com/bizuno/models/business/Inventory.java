@@ -33,9 +33,9 @@ public class Inventory extends BaseEntity {
     @JsonIgnore
     private Warehouse warehouse;
 
-    @NotNull(message = "Movement type is required")
-    @Enumerated(EnumType.STRING)
-    private ModelEnums.MovementType movementType;
+//    @NotNull(message = "Movement type is required")
+//    @Enumerated(EnumType.STRING)
+//    private ModelEnums.MovementType movementType;
 
     @NotNull(message = "Quantity is required")
     private Integer quantity;

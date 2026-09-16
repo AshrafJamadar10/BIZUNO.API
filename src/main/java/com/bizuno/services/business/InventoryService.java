@@ -33,47 +33,6 @@ public class InventoryService {
     private final TenantTransactionalUtil tenantTransactionalUtil;
     private final BusinessRepository businessRepository;
 
-    public CommonResponse createInventoryMovement(CreateInventoryRequestDTO request, String businessCode, UserDO userDO) {
-        Optional<Business> businessOpt = businessRepository.findByBusinessCode(businessCode);
-        if (businessOpt.isEmpty()) {
-            return new CommonResponse(AppConstants.STATUS_NOT_FOUND, String.format(AppConstants.NOT_FOUND, "Business"));
-        }
-        Business business = businessOpt.get();
-
-        return tenantTransactionalUtil.excecuteInTenantContext(business.getTenantId(), business.getDbName(), entityManager -> {
-            InventoryRepository inventoryRepository = tenantTransactionalUtil.getRepository(entityManager, InventoryRepository.class);
-            ProductRepository productRepository = tenantTransactionalUtil.getRepository(entityManager, ProductRepository.class);
-            WarehouseRepository warehouseRepository = tenantTransactionalUtil.getRepository(entityManager, WarehouseRepository.class);
-
-            Optional<Product> productOpt = productRepository.findById(request.getProductId());
-            if (productOpt.isEmpty()) {
-                return new CommonResponse(AppConstants.STATUS_NOT_FOUND, String.format(AppConstants.NOT_FOUND, "Product"));
-            }
-            Product product = productOpt.get();
-
-            Warehouse warehouse = null;
-            if (request.getWarehouseId() != null) {
-                Optional<Warehouse> warehouseOpt = warehouseRepository.findById(request.getWarehouseId());
-                if (warehouseOpt.isEmpty()) {
-                    return new CommonResponse(AppConstants.STATUS_NOT_FOUND, String.format(AppConstants.NOT_FOUND, "Warehouse"));
-                }
-                warehouse = warehouseOpt.get();
-            }
-
-            Inventory inventory = Inventory.builder()
-                    .product(product)
-                    .warehouse(warehouse)
-                    .movementType(request.getMovementType())
-                    .quantity(request.getQuantity())
-                    .note(request.getNote())
-                    .build();
-            inventory.prePersist();
-
-            Inventory savedInventory = inventoryRepository.save(inventory);
-            return new CommonResponse(AppConstants.STATUS_SUCCESS, String.format(AppConstants.MESSAGE_CREATED, "Inventory movement"), mapInventoryToResponse(savedInventory));
-        });
-    }
-
     public CommonResponse getAllInventoryMovements(String businessCode, UserDO userDO, int page, int size, String sortBy, String sortDirection) {
         Optional<Business> businessOpt = businessRepository.findByBusinessCode(businessCode);
         if (businessOpt.isEmpty()) {
@@ -84,7 +43,7 @@ public class InventoryService {
         return tenantTransactionalUtil.excecuteInTenantContext(business.getTenantId(), business.getDbName(), entityManager -> {
             InventoryRepository inventoryRepository = tenantTransactionalUtil.getRepository(entityManager, InventoryRepository.class);
 
-            String sortProp = (sortBy == null || sortBy.isBlank()) ? "createdAt" : sortBy;
+            String sortProp = (sortBy == null || sortBy.isBlank()) ? "createdBy" : sortBy;
             Sort.Direction direction = (sortDirection != null && sortDirection.equalsIgnoreCase("desc")) ? Sort.Direction.DESC : Sort.Direction.ASC;
 
             Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortProp));
@@ -144,13 +103,11 @@ public class InventoryService {
 
             Inventory inventory = inventoryOpt.get();
 
-            if (request.getProductId() != null) {
-                Optional<Product> productOpt = productRepository.findById(request.getProductId());
-                if (productOpt.isEmpty()) {
-                    return new CommonResponse(AppConstants.STATUS_NOT_FOUND, String.format(AppConstants.NOT_FOUND, "Product"));
-                }
-                inventory.setProduct(productOpt.get());
+            Optional<Product> productOpt = productRepository.findById(request.getProductId());
+            if (productOpt.isEmpty()) {
+                return new CommonResponse(AppConstants.STATUS_NOT_FOUND, String.format(AppConstants.NOT_FOUND, "Product"));
             }
+            inventory.setProduct(productOpt.get());
 
             if (request.getWarehouseId() != null) {
                 Optional<Warehouse> warehouseOpt = warehouseRepository.findById(request.getWarehouseId());
@@ -160,7 +117,7 @@ public class InventoryService {
                 inventory.setWarehouse(warehouseOpt.get());
             }
 
-            inventory.setMovementType(request.getMovementType());
+//            inventory.setMovementType(request.getMovementType());
             inventory.setQuantity(request.getQuantity());
             inventory.setNote(request.getNote());
             inventory.preUpdate();
@@ -208,7 +165,7 @@ public class InventoryService {
 
             List<Inventory> inventoryList = inventoryRepository.findAll().stream()
                     .filter(inv -> inv.getProduct().getProductId().equals(productId))
-                    .collect(Collectors.toList());
+                    .toList();
 
             List<InventoryResponseDTO> content = inventoryList.stream()
                     .map(this::mapInventoryToResponse)
@@ -236,7 +193,7 @@ public class InventoryService {
 
             List<Inventory> inventoryList = inventoryRepository.findAll().stream()
                     .filter(inv -> inv.getWarehouse() != null && inv.getWarehouse().getWarehouseId().equals(warehouseId))
-                    .collect(Collectors.toList());
+                    .toList();
 
             List<InventoryResponseDTO> content = inventoryList.stream()
                     .map(this::mapInventoryToResponse)
@@ -254,13 +211,13 @@ public class InventoryService {
                 .productSku(inventory.getProduct() != null ? inventory.getProduct().getSku() : null)
                 .warehouseId(inventory.getWarehouse() != null ? inventory.getWarehouse().getWarehouseId() : null)
                 .warehouseName(inventory.getWarehouse() != null ? inventory.getWarehouse().getName() : null)
-                .movementType(inventory.getMovementType())
+//                .movementType(inventory.getMovementType())
                 .quantity(inventory.getQuantity())
                 .note(inventory.getNote())
-                .createdAt(inventory.getCreatedAt())
-                .updatedAt(inventory.getUpdatedAt())
+                .createdAt(inventory.getCreatedDate())
+                .updatedAt(inventory.getModifiedDate())
                 .createdBy(inventory.getCreatedBy())
-                .updatedBy(inventory.getUpdatedBy())
+                .updatedBy(inventory.getModifiedBy())
                 .build();
     }
 }

@@ -7,10 +7,14 @@ import com.bizuno.dtos.business.UpdateProductRequestDTO;
 import com.bizuno.dtos.main.CommonResponse;
 import com.bizuno.dtos.main.UserDO;
 import com.bizuno.models.business.Category;
+import com.bizuno.models.business.Inventory;
 import com.bizuno.models.business.Product;
+import com.bizuno.models.business.Warehouse;
 import com.bizuno.models.main.Business;
 import com.bizuno.repositories.business.CategoryRepository;
+import com.bizuno.repositories.business.InventoryRepository;
 import com.bizuno.repositories.business.ProductRepository;
+import com.bizuno.repositories.business.WarehouseRepository;
 import com.bizuno.repositories.main.BusinessRepository;
 import com.bizuno.utils.TenantTransactionalUtil;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +44,8 @@ public class ProductService {
         return tenantTransactionalUtil.excecuteInTenantContext(business.getTenantId(), business.getDbName(), entityManager -> {
             ProductRepository productRepository = tenantTransactionalUtil.getRepository(entityManager, ProductRepository.class);
             CategoryRepository categoryRepository = tenantTransactionalUtil.getRepository(entityManager, CategoryRepository.class);
+            InventoryRepository inventoryRepository = tenantTransactionalUtil.getRepository(entityManager, InventoryRepository.class);
+            WarehouseRepository warehouseRepository = tenantTransactionalUtil.getRepository(entityManager, WarehouseRepository.class);
 
             if (productRepository.existsByName(request.getName())){
                 return new CommonResponse(AppConstants.STATUS_CONFLICT, String.format(AppConstants.MESSAGE_EXISTS, "Product name"));
@@ -52,6 +58,15 @@ public class ProductService {
                     return new CommonResponse(AppConstants.STATUS_NOT_FOUND, String.format(AppConstants.NOT_FOUND, "Category"));
                 }
                 category = categoryOpt.get();
+            }
+
+            Warehouse warehouse = null;
+            if (request.getWarehouseId() != null){
+                Optional<Warehouse> warehouseOpt = warehouseRepository.findById(request.getWarehouseId());
+                if (warehouseOpt.isEmpty()) {
+                    return new CommonResponse(AppConstants.STATUS_NOT_FOUND, String.format(AppConstants.NOT_FOUND, "Warehouse"));
+                }
+                warehouse = warehouseOpt.get();
             }
 
             Product product = Product.builder()
@@ -70,6 +85,16 @@ public class ProductService {
             product.prePersist();
 
             Product savedProduct = productRepository.save(product);
+
+            Inventory inventory = Inventory.builder()
+                    .product(savedProduct)
+                    .quantity(0)
+                    .warehouse(warehouse)
+                    .note(request.getDescription())
+                    .build();
+            inventory.prePersist();
+            inventoryRepository.save(inventory);
+
             return new CommonResponse(AppConstants.STATUS_SUCCESS, String.format(AppConstants.MESSAGE_CREATED, "Product"), mapProductToResponse(savedProduct));
         });
     }

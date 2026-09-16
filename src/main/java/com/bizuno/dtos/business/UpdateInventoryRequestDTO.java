@@ -12,6 +12,7 @@ import java.util.UUID;
 @Setter
 @Getter
 public class UpdateInventoryRequestDTO {
+    @NotNull(message = "Product id is required")
     private UUID productId;
 
     private UUID warehouseId;

@@ -1,12 +1,11 @@
 package com.bizuno.dtos.business;
 
 import com.bizuno.enums.ModelEnums;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.UUID;
 
 @Getter
@@ -23,8 +22,10 @@ public class InventoryResponseDTO {
     private ModelEnums.MovementType movementType;
     private Integer quantity;
     private String note;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    @JsonFormat(pattern = "dd-MM-yyyy HH:mm:ss")
+    private Date createdAt;
+    @JsonFormat(pattern = "dd-MM-yyyy HH:mm:ss")
+    private Date updatedAt;
     private String createdBy;
     private String updatedBy;
 }

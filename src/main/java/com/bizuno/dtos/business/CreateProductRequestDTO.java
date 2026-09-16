@@ -18,6 +18,8 @@ import java.util.UUID;
 public class CreateProductRequestDTO {
     private UUID categoryId;
 
+    private UUID warehouseId;
+
     @NotBlank(message = "Name is required")
     @Size(max = 100, message = "Name must not exceed 100 characters")
     @Pattern(regexp = RegexPatterns.REGEX_LETTERS_NUMBERS_AND_SPACES, message = "Name should contain only letters, numbers, and spaces")

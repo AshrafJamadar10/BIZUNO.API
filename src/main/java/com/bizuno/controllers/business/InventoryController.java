@@ -18,14 +18,6 @@ public class InventoryController {
 
     private final InventoryService inventoryService;
 
-    @PostMapping
-    public ResponseEntity<?> createInventoryMovement(@RequestBody CreateInventoryRequestDTO request,
-                                                     @PathVariable String businessCode,
-                                                     @RequestAttribute UserDO userDO) {
-        CommonResponse response = inventoryService.createInventoryMovement(request, businessCode, userDO);
-        return ResponseEntity.status(response.getStatus()).body(response);
-    }
-
     @GetMapping
     public ResponseEntity<?> getAllInventoryMovements(@RequestParam(defaultValue = "0") int page,
                                                       @RequestParam(defaultValue = "10") int size,
