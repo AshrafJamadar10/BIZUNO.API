@@ -45,6 +45,7 @@ public class BusinessUser {
     private String password;
 
     @JsonIgnore
+    @Column(length = 1000)
     private String refreshToken;
 
     @ManyToOne(fetch = FetchType.EAGER)

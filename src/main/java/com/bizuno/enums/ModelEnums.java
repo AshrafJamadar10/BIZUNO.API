@@ -121,4 +121,118 @@ public class ModelEnums {
             return values();
         }
     }
+
+    public enum StaffStatus {
+        ACTIVE,
+        INACTIVE,
+        ON_LEAVE,
+        TERMINATED;
+
+        public static StaffStatus[] getAllValues() {
+            return values();
+        }
+    }
+
+    public enum AttendanceStatus {
+        PRESENT,
+        ABSENT,
+        LATE,
+        HALF_DAY;
+
+        public static AttendanceStatus[] getAllValues() {
+            return values();
+        }
+    }
+
+    public enum CustomerStatus {
+        ACTIVE,
+        INACTIVE,
+        BLOCKED;
+
+        public static CustomerStatus[] getAllValues() {
+            return values();
+        }
+    }
+
+    public enum SupplierStatus {
+        ACTIVE,
+        INACTIVE,
+        BLOCKED;
+
+        public static SupplierStatus[] getAllValues() {
+            return values();
+        }
+    }
+
+    public enum ProductStatus {
+        ACTIVE,
+        INACTIVE,
+        DISCONTINUED;
+
+        public static ProductStatus[] getAllValues() {
+            return values();
+        }
+    }
+
+    public enum PaymentStatus {
+        PENDING,
+        COMPLETED,
+        FAILED,
+        REFUNDED,
+        PARTIALLY_PAID;
+
+        public static PaymentStatus[] getAllValues() {
+            return values();
+        }
+    }
+
+    public enum InvoiceStatus {
+        DRAFT,
+        SENT,
+        PAID,
+        OVERDUE,
+        CANCELLED;
+
+        public static InvoiceStatus[] getAllValues() {
+            return values();
+        }
+    }
+
+    public enum PaymentMethod {
+        CASH,
+        BANK_TRANSFER,
+        CREDIT_CARD,
+        DEBIT_CARD,
+        CHEQUE,
+        UPI,
+        ONLINE;
+
+        public static PaymentMethod[] getAllValues() {
+            return values();
+        }
+    }
+
+    public enum PurchaseOrderStatus {
+        DRAFT,
+        PENDING,
+        APPROVED,
+        ORDERED,
+        RECEIVED,
+        CANCELLED;
+
+        public static PurchaseOrderStatus[] getAllValues() {
+            return values();
+        }
+    }
+
+    public enum MovementType {
+        IN,
+        OUT,
+        TRANSFER,
+        ADJUSTMENT;
+
+        public static MovementType[] getAllValues() {
+            return values();
+        }
+    }
 }

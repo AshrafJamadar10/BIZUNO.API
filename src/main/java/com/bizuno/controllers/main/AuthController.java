@@ -7,10 +7,7 @@ import com.bizuno.services.main.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -31,9 +28,9 @@ public class AuthController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody @Valid LoginRequestDTO loginRequestDTO) {
-        CommonResponse response = authService.login(loginRequestDTO);
+    @PostMapping("/business/{businessCode}/login")
+    public ResponseEntity<?> login(@RequestBody @Valid LoginRequestDTO loginRequestDTO, @PathVariable String businessCode) {
+        CommonResponse response = authService.login(loginRequestDTO, businessCode);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 }

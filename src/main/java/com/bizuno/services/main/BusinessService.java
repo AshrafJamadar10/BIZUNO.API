@@ -62,6 +62,8 @@ public class BusinessService {
         business.setBusinessName(createBusinessRequestDTO.getBusinessName());
         business.setEmail(createBusinessRequestDTO.getEmail());
         business.setPhone(createBusinessRequestDTO.getPhone());
+        business.setFirstName(createBusinessRequestDTO.getFirstName());
+        business.setLastName(createBusinessRequestDTO.getLastName());
         business.prePersist();
 
         if (userRepository.findByEmailIgnoreCase(email).isPresent()) {

@@ -21,8 +21,8 @@ public class Codes {
             acronym = schoolName.substring(0, Math.min(3, schoolName.length())).toUpperCase();
         }
 
-        // 2️⃣ SmartAcad essence
-        String productCode = "SA";
+        // 2️⃣ BizUno essence
+        String productCode = "BU";
 
         // 3️⃣ Random 3-digit number for uniqueness
         int random = ThreadLocalRandom.current().nextInt(100, 999);
