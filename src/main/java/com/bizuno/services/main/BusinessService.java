@@ -28,7 +28,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +48,7 @@ public class BusinessService {
     private final Codes codes;
     private final TenantTransactionalUtil tenantTransactionalUtil;
     private final SubscriptionRepository subscriptionRepository;
+    private final FileService fileService;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Value("${packages-to-scan.business}")
@@ -64,6 +67,7 @@ public class BusinessService {
         business.setPhone(createBusinessRequestDTO.getPhone());
         business.setFirstName(createBusinessRequestDTO.getFirstName());
         business.setLastName(createBusinessRequestDTO.getLastName());
+
         business.prePersist();
 
         if (userRepository.findByEmailIgnoreCase(email).isPresent()) {
@@ -91,6 +95,16 @@ public class BusinessService {
             dbName = getDatabaseName(createBusinessRequestDTO.getBusinessName());
         }
         business.setDbName(dbName);
+
+        try {
+            if (createBusinessRequestDTO.getLogo() != null) {
+                String subFolder = "business/" + businessCode + "/logos/";
+                String logoPath = fileService.saveFile(createBusinessRequestDTO.getLogo(), subFolder);
+                business.setLogo(logoPath);
+            }
+        } catch (Exception e) {
+            return new CommonResponse(AppConstants.STATUS_BAD_REQUEST, e.getMessage());
+        }
 
         Business savedBusiness = businessRepository.save(business);
         System.out.println("✅ Tenant saved with tenant ID: " + savedBusiness.getTenantId());
@@ -144,6 +158,27 @@ public class BusinessService {
         business.setEmail(createBusinessRequestDTO.getEmail());
         business.setPhone(createBusinessRequestDTO.getPhone());
         business.preUpdate();
+
+        businessRepository.save(business);
+
+        return new CommonResponse(AppConstants.STATUS_SUCCESS, String.format(AppConstants.MESSAGE_UPDATED_SUCCESS, "business"), getBusinessResponseDTO(business));
+    }
+
+    public CommonResponse updateLogo(MultipartFile logo, UUID businessId) {
+        Optional<Business> optionalBusiness = businessRepository.findById(businessId);
+        if (optionalBusiness.isEmpty()) {
+            return new CommonResponse(AppConstants.STATUS_NOT_FOUND, String.format(AppConstants.NOT_FOUND, "business"));
+        }
+        Business business = optionalBusiness.get();
+
+        try {
+            String subFolder = "business/" + business.getBusinessCode() + "/logos/";
+            String logoPath = fileService.saveFile(logo, subFolder);
+            fileService.deleteFile(business.getLogo());
+            business.setLogo(logoPath);
+        } catch (Exception e) {
+            return new CommonResponse(AppConstants.STATUS_BAD_REQUEST, e.getMessage());
+        }
 
         businessRepository.save(business);
 

@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
 @Setter
 @Getter
@@ -32,4 +33,6 @@ public class CreateBusinessRequestDTO {
     @NotBlank(message = "Password is required")
     @Pattern(regexp = RegexPatterns.REGEX_PASSWORD, message = "Password should be valid")
     private String password;
+
+    private MultipartFile logo =  null;
 }
