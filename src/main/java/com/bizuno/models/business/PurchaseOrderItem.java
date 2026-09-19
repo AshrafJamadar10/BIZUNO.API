@@ -21,7 +21,7 @@ public class PurchaseOrderItem extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private UUID purchaseOrderItemId;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "purchase_order_id", nullable = false)
@@ -38,6 +38,12 @@ public class PurchaseOrderItem extends BaseEntity {
 
     @DecimalMin(value = "0.0", inclusive = true, message = "Unit cost must be greater than or equal to 0")
     private BigDecimal unitCost;
+
+    @DecimalMin(value = "0.0", inclusive = true, message = "Discount must be greater than or equal to 0")
+    private BigDecimal discount;
+
+    @DecimalMin(value = "0.0", inclusive = true, message = "Tax must be greater than or equal to 0")
+    private BigDecimal tax;
 
     @DecimalMin(value = "0.0", inclusive = true, message = "Line total must be greater than or equal to 0")
     private BigDecimal lineTotal = BigDecimal.ZERO;

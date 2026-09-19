@@ -89,10 +89,11 @@ public class SalesInvoiceService {
                             .product(productOpt.get())
                             .quantity(itemRequest.getQuantity())
                             .unitPrice(itemRequest.getUnitPrice())
-                            .discount(itemRequest.getDiscount())
-                            .tax(itemRequest.getTax())
-                            .total(itemRequest.getTotal())
-                            .description(itemRequest.getDescription())
+                            .discountAmount(itemRequest.getDiscountAmount())
+                            .discountPercent(itemRequest.getDiscountPercent())
+                            .taxRate(itemRequest.getTax())
+                            .lineTotal(itemRequest.getLineTotal())
+                            .note(itemRequest.getNote())
                             .build();
                     item.prePersist();
                     salesInvoiceItemRepository.save(item);
@@ -254,10 +255,11 @@ public class SalesInvoiceService {
                 .productName(item.getProduct() != null ? item.getProduct().getName() : null)
                 .quantity(item.getQuantity())
                 .unitPrice(item.getUnitPrice())
-                .discount(item.getDiscount())
-                .tax(item.getTax())
-                .total(item.getTotal())
-                .description(item.getDescription())
+                .discountAmount(item.getDiscountAmount())
+                .discountPercent(item.getDiscountPercent())
+                .tax(item.getTaxRate())
+                .lineTotal(item.getLineTotal())
+                .note(item.getNote())
                 .build();
     }
 }

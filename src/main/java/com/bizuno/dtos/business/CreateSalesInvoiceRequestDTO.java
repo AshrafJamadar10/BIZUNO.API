@@ -1,6 +1,9 @@
 package com.bizuno.dtos.business;
 
+import com.bizuno.enums.ModelEnums;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -46,10 +49,12 @@ public class CreateSalesInvoiceRequestDTO {
     private BigDecimal balance;
 
     @NotNull(message = "Status is required")
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private ModelEnums.InvoiceStatus status = ModelEnums.InvoiceStatus.DRAFT;
 
     @NotNull(message = "Payment status is required")
-    private String paymentStatus;
+    @Enumerated(EnumType.STRING)
+    private ModelEnums.PaymentStatus paymentStatus = ModelEnums.PaymentStatus.PENDING;
 
     @Size(max = 100, message = "Salesperson must not exceed 100 characters")
     private String salesperson;

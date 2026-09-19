@@ -18,10 +18,11 @@ public class SalesInvoiceItemResponseDTO {
     private UUID salesInvoiceItemId;
     private UUID productId;
     private String productName;
-    private BigDecimal quantity;
+    private Integer quantity;
     private BigDecimal unitPrice;
-    private BigDecimal discount;
+    private BigDecimal discountAmount;
+    private BigDecimal discountPercent;
     private BigDecimal tax;
-    private BigDecimal total;
-    private String description;
+    private BigDecimal lineTotal;
+    private String note;
 }

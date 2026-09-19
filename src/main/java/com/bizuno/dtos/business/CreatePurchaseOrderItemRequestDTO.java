@@ -17,7 +17,7 @@ public class CreatePurchaseOrderItemRequestDTO {
 
     @NotNull(message = "Quantity is required")
     @DecimalMin(value = "0.0", inclusive = true, message = "Quantity must be greater than or equal to 0")
-    private BigDecimal quantity;
+    private Integer quantity;
 
     @NotNull(message = "Unit price is required")
     @DecimalMin(value = "0.0", inclusive = true, message = "Unit price must be greater than or equal to 0")
@@ -31,7 +31,4 @@ public class CreatePurchaseOrderItemRequestDTO {
 
     @DecimalMin(value = "0.0", inclusive = true, message = "Total must be greater than or equal to 0")
     private BigDecimal total;
-
-    @Size(max = 500, message = "Description must not exceed 500 characters")
-    private String description;
 }

@@ -18,10 +18,10 @@ public class PurchaseOrderItemResponseDTO {
     private UUID purchaseOrderItemId;
     private UUID productId;
     private String productName;
-    private BigDecimal quantity;
-    private BigDecimal unitPrice;
+    private Integer quantity;
+    private BigDecimal unitCost;
     private BigDecimal discount;
     private BigDecimal tax;
-    private BigDecimal total;
+    private BigDecimal lineTotal;
     private String description;
 }

@@ -84,11 +84,10 @@ public class PurchaseOrderService {
                             .purchaseOrder(savedOrder)
                             .product(productOpt.get())
                             .quantity(itemRequest.getQuantity())
-                            .unitPrice(itemRequest.getUnitPrice())
+                            .unitCost(itemRequest.getUnitPrice())
                             .discount(itemRequest.getDiscount())
                             .tax(itemRequest.getTax())
-                            .total(itemRequest.getTotal())
-                            .description(itemRequest.getDescription())
+                            .lineTotal(itemRequest.getTotal())
                             .build();
                     item.prePersist();
                     purchaseOrderItemRepository.save(item);
@@ -241,11 +240,10 @@ public class PurchaseOrderService {
                 .productId(item.getProduct() != null ? item.getProduct().getProductId() : null)
                 .productName(item.getProduct() != null ? item.getProduct().getName() : null)
                 .quantity(item.getQuantity())
-                .unitPrice(item.getUnitPrice())
+                .unitCost(item.getUnitCost())
                 .discount(item.getDiscount())
                 .tax(item.getTax())
-                .total(item.getTotal())
-                .description(item.getDescription())
+                .lineTotal(item.getLineTotal())
                 .build();
     }
 }

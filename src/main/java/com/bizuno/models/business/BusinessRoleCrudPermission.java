@@ -7,6 +7,7 @@ import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Table(name = "crud_role_permissions")
@@ -19,7 +20,7 @@ public class BusinessRoleCrudPermission {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "crud_role_permission_id")
-    private Long crudRolePermissionId;
+    private UUID crudRolePermissionId;
 
     @NotBlank(message = "Scope is required")
     private String scope;

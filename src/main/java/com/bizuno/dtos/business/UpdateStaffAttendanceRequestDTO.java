@@ -1,6 +1,9 @@
 package com.bizuno.dtos.business;
 
+import com.bizuno.enums.ModelEnums;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,7 +19,8 @@ public class UpdateStaffAttendanceRequestDTO {
     private LocalDate attendanceDate;
 
     @NotNull(message = "Status is required")
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private ModelEnums.AttendanceStatus status;
 
     @JsonFormat(pattern = "dd-MM-yyyy HH:mm:ss", shape = JsonFormat.Shape.STRING)
     private LocalDateTime checkIn;

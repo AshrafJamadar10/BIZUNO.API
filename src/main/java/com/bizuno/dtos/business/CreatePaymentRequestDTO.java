@@ -1,6 +1,9 @@
 package com.bizuno.dtos.business;
 
+import com.bizuno.enums.ModelEnums;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -25,7 +28,8 @@ public class CreatePaymentRequestDTO {
     private String paymentReference;
 
     @NotNull(message = "Payment method is required")
-    private String paymentMethod;
+    @Enumerated(EnumType.STRING)
+    private ModelEnums.PaymentMethod paymentMethod;
 
     @NotNull(message = "Amount is required")
     @DecimalMin(value = "0.0", inclusive = true, message = "Amount must be greater than or equal to 0")
@@ -36,7 +40,8 @@ public class CreatePaymentRequestDTO {
     private LocalDateTime receivedAt;
 
     @NotNull(message = "Status is required")
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private ModelEnums.PaymentStatus status = ModelEnums.PaymentStatus.PENDING;
 
     @NotNull(message = "Payment method details is required")
     @Size(max = 500, message = "Payment method details must not exceed 500 characters")

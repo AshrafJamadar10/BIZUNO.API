@@ -169,12 +169,9 @@ public class BusinessRoleService {
 
     private BusinessRoleCrudPermissionResponseDTO mapPermissionToResponse(BusinessRoleCrudPermission permission){
         return BusinessRoleCrudPermissionResponseDTO.builder()
-                .permissionId(permission.getPermissionId())
-                .resource(permission.getResource())
-                .canCreate(permission.getCanCreate())
-                .canRead(permission.getCanRead())
-                .canUpdate(permission.getCanUpdate())
-                .canDelete(permission.getCanDelete())
+                .permissionId(permission.getCrudRolePermissionId())
+                .scope(permission.getScope())
+                .operations(permission.getOperations())
                 .build();
     }
 }

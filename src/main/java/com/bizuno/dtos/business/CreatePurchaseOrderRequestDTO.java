@@ -1,6 +1,9 @@
 package com.bizuno.dtos.business;
 
+import com.bizuno.enums.ModelEnums;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -40,7 +43,8 @@ public class CreatePurchaseOrderRequestDTO {
     private BigDecimal total;
 
     @NotNull(message = "Status is required")
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private ModelEnums.PurchaseOrderStatus status = ModelEnums.PurchaseOrderStatus.DRAFT;
 
     private List<CreatePurchaseOrderItemRequestDTO> items;
 }
