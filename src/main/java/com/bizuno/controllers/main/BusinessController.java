@@ -6,6 +6,7 @@ import com.bizuno.services.main.BusinessService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,6 +27,7 @@ public class BusinessController {
     }
 
     @PutMapping("/{businessId}")
+    @PreAuthorize("hasAuthority('BUSINESS_UPDATE')")
     public ResponseEntity<?> updateBusiness(@PathVariable UUID businessId,
                                             @RequestBody @Valid CreateBusinessRequestDTO createBusinessRequestDTO) {
         CommonResponse response = businessService.updateBusiness(businessId, createBusinessRequestDTO);
@@ -33,12 +35,14 @@ public class BusinessController {
     }
 
     @PutMapping("/{businessId}/logo")
+    @PreAuthorize("hasAuthority('BUSINESS_UPDATE')")
     public ResponseEntity<?> updateLogo(@RequestParam MultipartFile logo, @PathVariable UUID businessId){
         CommonResponse response = businessService.updateLogo(logo, businessId);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @GetMapping
+    @PreAuthorize("hasAuthority('BUSINESS_READ')")
     public ResponseEntity<?> getAllBusiness(@RequestParam(defaultValue = "0") int page,
                                             @RequestParam(defaultValue = "10") int size,
                                             @RequestParam(required = false) String sortBy,
@@ -48,12 +52,14 @@ public class BusinessController {
     }
 
     @GetMapping("/{businessId}")
+    @PreAuthorize("hasAuthority('BUSINESS_READ')")
     public ResponseEntity<?> getBusiness(@PathVariable UUID businessId) {
         CommonResponse response = businessService.getBusiness(businessId);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('BUSINESS_DELETE')")
     public ResponseEntity<?> deleteBusiness(@PathVariable UUID businessId) {
         CommonResponse response = businessService.deleteBusiness(businessId);
         return ResponseEntity.status(response.getStatus()).body(response);

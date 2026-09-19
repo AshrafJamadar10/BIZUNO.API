@@ -7,6 +7,7 @@ import com.bizuno.dtos.main.BusinessResponseDTO;
 import com.bizuno.dtos.main.CommonResponse;
 import com.bizuno.enums.ModelEnums;
 import com.bizuno.models.business.BusinessRole;
+import com.bizuno.models.business.BusinessRoleCrudPermission;
 import com.bizuno.models.business.BusinessUser;
 import com.bizuno.models.main.Business;
 import com.bizuno.models.main.Subscription;
@@ -32,11 +33,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -124,12 +121,22 @@ public class BusinessService {
             BusinessUserRepository businessUserRepository = tenantTransactionalUtil.getRepository(entityManager, BusinessUserRepository.class);
             BusinessRoleRepository businessRoleRepository = tenantTransactionalUtil.getRepository(entityManager, BusinessRoleRepository.class);
 
+            Set<String> operations = Set.of("CREATE", "READ", "UPDATE", "DELETE");
+
             BusinessRole role = BusinessRole.builder()
                     .name("ADMIN")
                     .description("Administrator role with full access")
                     .type(ModelEnums.RoleType.BUSINESS.name())
                     .title(ModelEnums.Titles.ADMIN.name())
                     .build();
+
+            ModelEnums.CrudPermissionScopes[] crudPermissionList = ModelEnums.CrudPermissionScopes.getAllValues();
+            for (ModelEnums.CrudPermissionScopes permission : crudPermissionList) {
+                role.addPermission(BusinessRoleCrudPermission.builder()
+                        .scope(permission.name())
+                        .operations(operations)
+                        .build());
+            }
 
             role = businessRoleRepository.save(role);
 

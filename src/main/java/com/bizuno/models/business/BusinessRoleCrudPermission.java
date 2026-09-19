@@ -18,20 +18,19 @@ import java.util.UUID;
 @NoArgsConstructor
 public class BusinessRoleCrudPermission {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "crud_role_permission_id")
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID crudRolePermissionId;
 
     @NotBlank(message = "Scope is required")
     private String scope;
 
     @Builder.Default
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable( name = "crud_operations", joinColumns = @JoinColumn(name = "crud_role_permission_id"))
     @Column(name = "operation", nullable = false)
     private Set<String> operations = new HashSet<>();
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "role_id", nullable = false)
     @JsonBackReference
     private BusinessRole role;

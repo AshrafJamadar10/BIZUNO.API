@@ -30,7 +30,8 @@ public class SecurityConfig {
                     "/webjars/**",
                     "/favicon.ico",
                     "/error",
-                    "/bizuno/auth/**"
+                    "/bizuno/auth/**",
+                    "/bizuno/business"
                 ).permitAll()
                 .anyRequest().authenticated()
             )
