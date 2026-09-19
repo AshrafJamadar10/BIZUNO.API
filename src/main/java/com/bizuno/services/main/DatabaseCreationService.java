@@ -1,14 +1,17 @@
 package com.bizuno.services.main;
 
 import com.bizuno.exception.TenantDatabaseException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+@Slf4j
 @Service
 public class DatabaseCreationService {
 
@@ -29,17 +32,19 @@ public class DatabaseCreationService {
 
     public void createTenantDatabase(String dbName) {
         String url = "jdbc:postgresql://" + dbHost + ":" + dbPort + "/" + adminDbName;
-        
+
         try (Connection connection = DriverManager.getConnection(url, adminUsername, adminPassword);
              Statement statement = connection.createStatement()) {
-            
-            String sql = "CREATE DATABASE " + dbName;
+
+            // Escape double quotes in database name to prevent SQL injection
+            String escapedDbName = dbName.replace("\"", "\"\"");
+            String sql = "CREATE DATABASE \"" + escapedDbName + "\"";
             statement.execute(sql);
-            System.out.println("✅ Database created successfully: " + dbName);
-            
+            log.info("Database created successfully: {}", dbName);
+
         } catch (SQLException e) {
             if (e.getMessage().contains("already exists")) {
-                System.out.println("⚠️ Database already exists: " + dbName);
+                log.warn("Database already exists: {}", dbName);
             } else {
                 throw new TenantDatabaseException("Failed to create database: " + dbName, null, dbName, e);
             }
@@ -48,14 +53,16 @@ public class DatabaseCreationService {
 
     public void dropTenantDatabase(String dbName) {
         String url = "jdbc:postgresql://" + dbHost + ":" + dbPort + "/" + adminDbName;
-        
+
         try (Connection connection = DriverManager.getConnection(url, adminUsername, adminPassword);
              Statement statement = connection.createStatement()) {
-            
-            String sql = "DROP DATABASE IF EXISTS " + dbName;
+
+            // Escape double quotes in database name to prevent SQL injection
+            String escapedDbName = dbName.replace("\"", "\"\"");
+            String sql = "DROP DATABASE IF EXISTS \"" + escapedDbName + "\"";
             statement.execute(sql);
-            System.out.println("✅ Database dropped successfully: " + dbName);
-            
+            log.info("Database dropped successfully: {}", dbName);
+
         } catch (SQLException e) {
             throw new TenantDatabaseException("Failed to drop database: " + dbName, null, dbName, e);
         }
@@ -65,10 +72,11 @@ public class DatabaseCreationService {
         String url = "jdbc:postgresql://" + dbHost + ":" + dbPort + "/" + adminDbName;
         
         try (Connection connection = DriverManager.getConnection(url, adminUsername, adminPassword);
-             Statement statement = connection.createStatement()) {
+             PreparedStatement statement = connection.prepareStatement(
+                 "SELECT 1 FROM pg_database WHERE datname = ?")) {
             
-            String sql = "SELECT 1 FROM pg_database WHERE datname = '" + dbName + "'";
-            var resultSet = statement.executeQuery(sql);
+            statement.setString(1, dbName);
+            var resultSet = statement.executeQuery();
             return resultSet.next();
             
         } catch (SQLException e) {

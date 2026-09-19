@@ -5,6 +5,7 @@ import jakarta.annotation.PreDestroy;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -18,6 +19,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
+@Slf4j
 @Configuration
 public class BusinessDatabaseConfig {
 
@@ -37,9 +39,9 @@ public class BusinessDatabaseConfig {
 
     public EntityManagerFactory getOrCreateTenantEntityManagerFactory(String tenantId, String dbName, String packagesToScan) {
         return tenantEmfMap.computeIfAbsent(tenantId, key -> {
-            System.out.println("🔄 Creating EntityManagerFactory for tenant: " + tenantId + ", database: " + dbName);
+            log.info("Creating EntityManagerFactory for tenant: {}, database: {}", tenantId, dbName);
             EntityManagerFactory emf = createTenantEntityManagerFactory(dbName, packagesToScan);
-            System.out.println("✅ Tenant database setup completed: " + dbName);
+            log.info("Tenant database setup completed: {}", dbName);
             return emf;
         });
     }
@@ -107,9 +109,9 @@ public class BusinessDatabaseConfig {
         try {
             em = emf.createEntityManager();
             em.createQuery("SELECT 1 FROM Object").setMaxResults(1).getResultList();
-            System.out.println("Schema creation triggered for: " + dbName);
+            log.debug("Schema creation triggered for: {}", dbName);
         } catch (Exception e) {
-            System.out.println("DDL execution completed for: " + dbName);
+            log.debug("DDL execution completed for: {}", dbName);
         } finally {
             if (em != null && em.isOpen()) {
                 em.close();
@@ -131,7 +133,7 @@ public class BusinessDatabaseConfig {
         EntityManagerFactory emf = tenantEmfMap.remove(tenantId);
         if (emf != null && emf.isOpen()) {
             emf.close();
-            System.out.println("Closed EntityManagerFactory for tenant: " + tenantId);
+            log.info("Closed EntityManagerFactory for tenant: {}", tenantId);
         }
     }
 
@@ -150,12 +152,12 @@ public class BusinessDatabaseConfig {
         EntityTransaction transaction = null;
 
         try {
-            System.out.println("🔍 Looking for EntityManagerFactory for tenantId: " + tenantId);
-            System.out.println("🔍 Current tenantEmfMap keys: " + tenantEmfMap.keySet());
-            
+            log.debug("Looking for EntityManagerFactory for tenantId: {}", tenantId);
+            log.debug("Current tenantEmfMap keys: {}", tenantEmfMap.keySet());
+
             EntityManagerFactory emf = hasTenantEntityManagerFactory(tenantId) ? getTenantEntityManagerFactory(tenantId) : null;
             if(emf == null){
-                System.out.println("❌ EntityManagerFactory not found for tenant: " + tenantId);
+                log.error("EntityManagerFactory not found for tenant: {}", tenantId);
                 throw new TenantDatabaseException("Invalid tenant provided", tenantId, dbName);
             }
 
@@ -175,7 +177,7 @@ public class BusinessDatabaseConfig {
                 try {
                     transaction.rollback();
                 } catch (Exception rollbackEx) {
-                    System.out.println("Rollback failed for tenant: " + tenantId + rollbackEx);
+                    log.error("Rollback failed for tenant: {}", tenantId, rollbackEx);
                 }
             }
             throw new TenantDatabaseException("Failed to save in school database", tenantId, dbName, e);
@@ -204,11 +206,11 @@ public class BusinessDatabaseConfig {
      */
     @PreDestroy
     public void cleanup() {
-        System.out.println("Cleaning up tenant EntityManagerFactories...");
+        log.info("Cleaning up tenant EntityManagerFactories...");
         tenantEmfMap.forEach((tenantId, emf) -> {
             if (emf != null && emf.isOpen()) {
                 emf.close();
-                System.out.println("Closed EntityManagerFactory for tenant: " + tenantId);
+                log.info("Closed EntityManagerFactory for tenant: {}", tenantId);
             }
         });
         tenantEmfMap.clear();

@@ -1,6 +1,7 @@
 package com.bizuno.models.business;
 
 import com.bizuno.constants.RegexPatterns;
+import com.bizuno.models.main.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -17,7 +18,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class BusinessUser {
+public class BusinessUser extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID userId;
@@ -48,7 +49,7 @@ public class BusinessUser {
     @Column(length = 1000)
     private String refreshToken;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "role_id")
     @JsonManagedReference
     private BusinessRole role;

@@ -21,6 +21,7 @@ import com.bizuno.utils.UniqueCodeGenerator;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -37,6 +38,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class BusinessService {
@@ -56,11 +58,11 @@ public class BusinessService {
 
     @Transactional
     public CommonResponse createBusiness(CreateBusinessRequestDTO createBusinessRequestDTO) {
-        System.out.println("🚀 Starting tenant creation for: " + createBusinessRequestDTO.getBusinessName());
+        log.info("Starting tenant creation for: {}", createBusinessRequestDTO.getBusinessName());
 
         String email = createBusinessRequestDTO.getEmail();
         String phone = createBusinessRequestDTO.getPhone();
-        
+
         Business business = new Business();
         business.setBusinessName(createBusinessRequestDTO.getBusinessName());
         business.setEmail(createBusinessRequestDTO.getEmail());
@@ -107,16 +109,16 @@ public class BusinessService {
         }
 
         Business savedBusiness = businessRepository.save(business);
-        System.out.println("✅ Tenant saved with tenant ID: " + savedBusiness.getTenantId());
+        log.info("Tenant saved with tenant ID: {}", savedBusiness.getTenantId());
 
         databaseCreationService.createTenantDatabase(dbName);
-        System.out.println("✅ Database created: " + dbName);
+        log.info("Database created: {}", dbName);
 
-        System.out.println("🔧 Creating EntityManagerFactory for tenant ID: " + business.getTenantId());
+        log.info("Creating EntityManagerFactory for tenant ID: {}", business.getTenantId());
         businessDatabaseConfig.getOrCreateTenantEntityManagerFactory(
             business.getTenantId(), dbName, tenantPackagesToScan
         );
-        System.out.println("✅ EntityManagerFactory creation completed");
+        log.info("EntityManagerFactory creation completed");
 
         return tenantTransactionalUtil.excecuteInTenantContext(business.getTenantId(), business.getDbName(), entityManager -> {
             BusinessUserRepository businessUserRepository = tenantTransactionalUtil.getRepository(entityManager, BusinessUserRepository.class);

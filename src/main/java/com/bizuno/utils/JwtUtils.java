@@ -68,7 +68,7 @@ public class JwtUtils {
                 .userId(UUID.fromString(claims.getSubject()))
                 .userType(claims.get("userType", String.class))
                 .phoneOrEmail(claims.get("phoneOrEmail", String.class))
-                .businessCode(claims.get("schoolCode", String.class))
+                .businessCode(claims.get("businessCode", String.class))
                 .packageScopes(
                         claims.get("packageScopes") != null
                                 ? ((List<?>) claims.get("packageScopes"))
