@@ -7,7 +7,9 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.UUID;
 
 @RestController
@@ -17,24 +19,30 @@ public class BusinessController {
 
     private final BusinessService businessService;
 
-    @PostMapping
-    public ResponseEntity<?> createBusiness(@RequestBody @Valid CreateBusinessRequestDTO createBusinessRequestDTO) {
+    @PostMapping(consumes = {"multipart/form-data"})
+    public ResponseEntity<?> createBusiness(@ModelAttribute @Valid CreateBusinessRequestDTO createBusinessRequestDTO){
         CommonResponse response = businessService.createBusiness(createBusinessRequestDTO);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @PutMapping("/{businessId}")
     public ResponseEntity<?> updateBusiness(@PathVariable UUID businessId,
-                                          @RequestBody @Valid CreateBusinessRequestDTO createBusinessRequestDTO) {
+                                            @RequestBody @Valid CreateBusinessRequestDTO createBusinessRequestDTO) {
         CommonResponse response = businessService.updateBusiness(businessId, createBusinessRequestDTO);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @PutMapping("/{businessId}/logo")
+    public ResponseEntity<?> updateLogo(@RequestParam MultipartFile logo, @PathVariable UUID businessId){
+        CommonResponse response = businessService.updateLogo(logo, businessId);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @GetMapping
     public ResponseEntity<?> getAllBusiness(@RequestParam(defaultValue = "0") int page,
-                                           @RequestParam(defaultValue = "10") int size,
-                                           @RequestParam(required = false) String sortBy,
-                                           @RequestParam(required = false) String sortDirection) {
+                                            @RequestParam(defaultValue = "10") int size,
+                                            @RequestParam(required = false) String sortBy,
+                                            @RequestParam(required = false) String sortDirection) {
         CommonResponse response = businessService.getAllBusiness(page, size, sortBy, sortDirection);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
