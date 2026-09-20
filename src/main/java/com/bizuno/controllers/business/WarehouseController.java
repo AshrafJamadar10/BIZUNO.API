@@ -7,6 +7,7 @@ import com.bizuno.dtos.main.UserDO;
 import com.bizuno.services.business.WarehouseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -19,6 +20,7 @@ public class WarehouseController {
     private final WarehouseService warehouseService;
 
     @PostMapping
+    @PreAuthorize("hasAuthority('WAREHOUSES_CREATE')")
     public ResponseEntity<?> createWarehouse(@RequestBody CreateWarehouseRequestDTO request,
                                             @PathVariable String businessCode,
                                             @RequestAttribute UserDO userDO) {

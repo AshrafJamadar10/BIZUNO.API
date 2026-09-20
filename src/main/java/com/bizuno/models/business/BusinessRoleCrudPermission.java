@@ -25,7 +25,7 @@ public class BusinessRoleCrudPermission {
     private String scope;
 
     @Builder.Default
-    @ElementCollection(fetch = FetchType.LAZY)
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable( name = "crud_operations", joinColumns = @JoinColumn(name = "crud_role_permission_id"))
     @Column(name = "operation", nullable = false)
     private Set<String> operations = new HashSet<>();

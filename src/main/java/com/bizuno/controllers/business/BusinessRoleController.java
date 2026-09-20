@@ -7,6 +7,7 @@ import com.bizuno.dtos.main.UserDO;
 import com.bizuno.services.business.BusinessRoleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -19,6 +20,7 @@ public class BusinessRoleController {
     private final BusinessRoleService businessRoleService;
 
     @PostMapping
+    @PreAuthorize("hasAuthority('BUSINESS_ROLE_CREATE')")
     public ResponseEntity<?> createBusinessRole(@RequestBody CreateBusinessRoleRequestDTO request,
                                                  @PathVariable String businessCode,
                                                  @RequestAttribute UserDO userDO) {
@@ -27,6 +29,7 @@ public class BusinessRoleController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAuthority('BUSINESS_ROLE_READ')")
     public ResponseEntity<?> getAllBusinessRoles(@RequestParam(defaultValue = "0") int page,
                                                  @RequestParam(defaultValue = "10") int size,
                                                  @RequestParam(required = false) String sortBy,
@@ -38,6 +41,7 @@ public class BusinessRoleController {
     }
 
     @GetMapping("/{roleId}")
+    @PreAuthorize("hasAuthority('BUSINESS_ROLE_READ')")
     public ResponseEntity<?> getBusinessRoleById(@PathVariable UUID roleId,
                                                @PathVariable String businessCode,
                                                @RequestAttribute UserDO userDO) {
@@ -46,6 +50,7 @@ public class BusinessRoleController {
     }
 
     @PutMapping("/{roleId}")
+    @PreAuthorize("hasAuthority('BUSINESS_ROLE_UPDATE')")
     public ResponseEntity<?> updateBusinessRole(@PathVariable UUID roleId,
                                               @RequestBody UpdateBusinessRoleRequestDTO request,
                                               @PathVariable String businessCode,
@@ -55,6 +60,7 @@ public class BusinessRoleController {
     }
 
     @DeleteMapping("/{roleId}")
+    @PreAuthorize("hasAuthority('BUSINESS_ROLE_DELETE')")
     public ResponseEntity<?> deleteBusinessRole(@PathVariable UUID roleId,
                                                @PathVariable String businessCode,
                                                @RequestAttribute UserDO userDO) {

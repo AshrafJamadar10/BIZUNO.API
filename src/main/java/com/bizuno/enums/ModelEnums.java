@@ -36,12 +36,12 @@ public class ModelEnums {
         public static PlatformAuditModule[] getAllValues(){ return  values();}
     }
 
-    public enum USER_TYPE {
-        PLATFORM_USER,
-        BUSINESS_USER;
-
-        public static USER_TYPE[] getAllValues(){ return  values();}
-    }
+//    public enum USER_TYPE {
+//        PLATFORM_USER,
+//        BUSINESS_USER;
+//
+//        public static USER_TYPE[] getAllValues(){ return  values();}
+//    }
 
     public enum SubscriptionStatus {
         ACTIVE,
@@ -85,28 +85,42 @@ public class ModelEnums {
     }
 
     public enum CrudPermissionScopes {
+        BUSINESS,
         DASHBOARD,
-        USERS,
-        WAREHOUSES,
-        CUSTOMERS,
-        PRODUCTS,
-        PURCHASES,
-        INVENTORY,
-        SALES_AND_INVOICES,
-        PAYMENTS,
-        SUPPLIERS,
-        REPORTS,
+        PACKAGE,
+        ROLE,
+        USER,
         SETTINGS,
-        STAFF,
-        ATTENDANCE,
-        ROLES,
-        NOTIFICATIONS,
         AUDIT_LOGS,
-        API_ACCESS,
-        CUSTOM_BRANDING,
-        PRIORITY_SUPPORT;
+        SUBSCRIPTION;
 
         public static CrudPermissionScopes[] getAllValues() {
+            return values();
+        }
+    }
+
+    public enum CrudPermissionScopesBusiness {
+        DASHBOARD,
+        USERS,
+        WAREHOUSE,
+        CUSTOMER,
+        PRODUCT,
+        PRODUCT_CATEGORY,
+        PURCHASE,
+        INVENTORY,
+        SALES_AND_INVOICE,
+        PAYMENT,
+        SUPPLIER,
+        REPORT,
+        SETTING,
+        STAFF,
+        ATTENDANCE,
+        ROLE,
+        NOTIFICATION,
+        AUDIT_LOG,
+        PRIORITY_SUPPORT;
+
+        public static CrudPermissionScopesBusiness[] getAllValues() {
             return values();
         }
     }

@@ -24,42 +24,14 @@ import java.util.Map;
 )
 public class MainDatabaseConfig {
 
-    @Value("${spring.datasource.url}")
-    private String url;
-
-    @Value("${spring.datasource.username}")
-    private String username;
-
-    @Value("${spring.datasource.password}")
-    private String password;
-
-    @Value("${spring.datasource.driver-class-name}")
-    private String driverClassName;
-
     @Value("${packages-to-scan.main}")
     private String packagesToScanMain;
 
     @Bean
     @Primary
-    public DataSource mainDataSource() {
-        com.zaxxer.hikari.HikariConfig config = new com.zaxxer.hikari.HikariConfig();
-        config.setJdbcUrl(url);
-        config.setUsername(username);
-        config.setPassword(password);
-        config.setDriverClassName(driverClassName);
-        config.setMaximumPoolSize(10);
-        config.setMinimumIdle(2);
-        config.setConnectionTimeout(30000);
-        config.setPoolName("MainDB-Pool");
-
-        return new com.zaxxer.hikari.HikariDataSource(config);
-    }
-
-    @Bean
-    @Primary
-    public LocalContainerEntityManagerFactoryBean mainEntityManagerFactory() {
+    public LocalContainerEntityManagerFactoryBean mainEntityManagerFactory(DataSource dataSource) {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
-        em.setDataSource(mainDataSource());
+        em.setDataSource(dataSource);
         em.setPackagesToScan(packagesToScanMain);
         em.setPersistenceUnitName("main-persistence-unit");
 
@@ -75,9 +47,9 @@ public class MainDatabaseConfig {
 
     @Bean
     @Primary
-    public PlatformTransactionManager mainTransactionManager() {
+    public PlatformTransactionManager mainTransactionManager(LocalContainerEntityManagerFactoryBean mainEntityManagerFactory) {
         JpaTransactionManager transactionManager = new JpaTransactionManager();
-        transactionManager.setEntityManagerFactory(mainEntityManagerFactory().getObject());
+        transactionManager.setEntityManagerFactory(mainEntityManagerFactory.getObject());
         return transactionManager;
     }
 

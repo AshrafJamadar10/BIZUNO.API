@@ -50,7 +50,7 @@ public class JwtInterceptor implements HandlerInterceptor {
             if (jwtUtils.validateToken(token)) {
                 UserDO userDO = jwtUtils.getUserDataFromToken(token);
 
-                if(userDO.getUserType().equals(ModelEnums.USER_TYPE.PLATFORM_USER.toString())){
+                if(userDO.getUserType().equals(ModelEnums.RoleType.PLATFORM.name())){
                     Optional<User> userOpt = userRepository.findById(userDO.getUserId());
                     if (userOpt.isEmpty()) {
                         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -64,7 +64,7 @@ public class JwtInterceptor implements HandlerInterceptor {
                         return false;
                     }
                     userDO.setRole(roleFormatterForUI.formatRole(user.getRole() == null ? null : user.getRole()));
-                }else if(userDO.getUserType().equals(ModelEnums.USER_TYPE.BUSINESS_USER.toString())) {
+                }else if(userDO.getUserType().equals(ModelEnums.RoleType.BUSINESS.name())) {
                     Optional<Business> businessOptional = businessRepository.findByBusinessCode(userDO.getBusinessCode());
                     if (businessOptional.isEmpty()) {
                         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

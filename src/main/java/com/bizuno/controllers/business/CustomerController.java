@@ -7,6 +7,7 @@ import com.bizuno.dtos.main.UserDO;
 import com.bizuno.services.business.CustomerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -19,6 +20,7 @@ public class CustomerController {
     private final CustomerService customerService;
 
     @PostMapping
+    @PreAuthorize("hasAuthority('CUSTOMER_CREATE')")
     public ResponseEntity<?> createCustomer(@RequestBody CreateCustomerRequestDTO request,
                                              @PathVariable String businessCode,
                                              @RequestAttribute UserDO userDO) {
@@ -27,6 +29,7 @@ public class CustomerController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAuthority('CUSTOMER_READ')")
     public ResponseEntity<?> getAllCustomers(@RequestParam(defaultValue = "0") int page,
                                              @RequestParam(defaultValue = "10") int size,
                                              @RequestParam(required = false) String sortBy,
@@ -38,6 +41,7 @@ public class CustomerController {
     }
 
     @GetMapping("/{customerId}")
+    @PreAuthorize("hasAuthority('CUSTOMER_READ')")
     public ResponseEntity<?> getCustomerById(@PathVariable UUID customerId,
                                             @PathVariable String businessCode,
                                             @RequestAttribute UserDO userDO) {
@@ -46,6 +50,7 @@ public class CustomerController {
     }
 
     @PutMapping("/{customerId}")
+    @PreAuthorize("hasAuthority('CUSTOMER_UPDATE')")
     public ResponseEntity<?> updateCustomer(@PathVariable UUID customerId,
                                            @RequestBody UpdateCustomerRequestDTO request,
                                            @PathVariable String businessCode,
@@ -55,6 +60,7 @@ public class CustomerController {
     }
 
     @DeleteMapping("/{customerId}")
+    @PreAuthorize("hasAuthority('CUSTOMER_DELETE')")
     public ResponseEntity<?> deleteCustomer(@PathVariable UUID customerId,
                                             @PathVariable String businessCode,
                                             @RequestAttribute UserDO userDO) {

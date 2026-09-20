@@ -7,6 +7,7 @@ import com.bizuno.dtos.main.UserDO;
 import com.bizuno.services.business.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -19,6 +20,7 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @PostMapping
+    @PreAuthorize("hasAuthority('PRODUCT_CATEGORY_CREATE')")
     public ResponseEntity<?> createCategory(@RequestBody CreateCategoryRequestDTO request,
                                          @PathVariable String businessCode,
                                          @RequestAttribute UserDO userDO) {
@@ -27,6 +29,7 @@ public class CategoryController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAuthority('PRODUCT_CATEGORY_READ')")
     public ResponseEntity<?> getAllCategories(@RequestParam(defaultValue = "0") int page,
                                               @RequestParam(defaultValue = "10") int size,
                                               @RequestParam(required = false) String sortBy,
@@ -38,6 +41,7 @@ public class CategoryController {
     }
 
     @GetMapping("/{categoryId}")
+    @PreAuthorize("hasAuthority('PRODUCT_CATEGORY_READ')")
     public ResponseEntity<?> getCategoryById(@PathVariable UUID categoryId,
                                            @PathVariable String businessCode,
                                            @RequestAttribute UserDO userDO) {
@@ -46,6 +50,7 @@ public class CategoryController {
     }
 
     @PutMapping("/{categoryId}")
+    @PreAuthorize("hasAuthority('PRODUCT_CATEGORY_UPDATE')")
     public ResponseEntity<?> updateCategory(@PathVariable UUID categoryId,
                                            @RequestBody UpdateCategoryRequestDTO request,
                                            @PathVariable String businessCode,
@@ -55,6 +60,7 @@ public class CategoryController {
     }
 
     @DeleteMapping("/{categoryId}")
+    @PreAuthorize("hasAuthority('PRODUCT_CATEGORY_DELETE')")
     public ResponseEntity<?> deleteCategory(@PathVariable UUID categoryId,
                                            @PathVariable String businessCode,
                                            @RequestAttribute UserDO userDO) {

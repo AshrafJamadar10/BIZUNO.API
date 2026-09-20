@@ -130,8 +130,8 @@ public class BusinessService {
                     .title(ModelEnums.Titles.ADMIN.name())
                     .build();
 
-            ModelEnums.CrudPermissionScopes[] crudPermissionList = ModelEnums.CrudPermissionScopes.getAllValues();
-            for (ModelEnums.CrudPermissionScopes permission : crudPermissionList) {
+            ModelEnums.CrudPermissionScopesBusiness[] crudPermissionList = ModelEnums.CrudPermissionScopesBusiness.getAllValues();
+            for (ModelEnums.CrudPermissionScopesBusiness permission : crudPermissionList) {
                 role.addPermission(BusinessRoleCrudPermission.builder()
                         .scope(permission.name())
                         .operations(operations)

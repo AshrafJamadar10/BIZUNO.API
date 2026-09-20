@@ -23,13 +23,13 @@ import java.util.function.Function;
 @Configuration
 public class BusinessDatabaseConfig {
 
-    @Value("${spring.datasource.username}")
+    @Value("${db.username}")
     private String username;
 
-    @Value("${spring.datasource.password}")
+    @Value("${db.password}")
     private String password;
 
-    @Value("${spring.datasource.driver-class-name}")
+    @Value("${spring.datasource.driver-class-name:org.postgresql.Driver}")
     private String driverClassName;
 
     @Value("${business.datasource.url}")

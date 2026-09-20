@@ -7,6 +7,7 @@ import com.bizuno.dtos.main.UserDO;
 import com.bizuno.services.business.InventoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -19,6 +20,7 @@ public class InventoryController {
     private final InventoryService inventoryService;
 
     @GetMapping
+    @PreAuthorize("hasAuthority('INVENTORY_READ')")
     public ResponseEntity<?> getAllInventoryMovements(@RequestParam(defaultValue = "0") int page,
                                                       @RequestParam(defaultValue = "10") int size,
                                                       @RequestParam(required = false) String sortBy,
@@ -30,6 +32,7 @@ public class InventoryController {
     }
 
     @GetMapping("/{inventoryMovementId}")
+    @PreAuthorize("hasAuthority('INVENTORY_READ')")
     public ResponseEntity<?> getInventoryMovementById(@PathVariable UUID inventoryMovementId,
                                                      @PathVariable String businessCode,
                                                      @RequestAttribute UserDO userDO) {
@@ -38,6 +41,7 @@ public class InventoryController {
     }
 
     @PutMapping("/{inventoryMovementId}")
+    @PreAuthorize("hasAuthority('INVENTORY_UPDATE')")
     public ResponseEntity<?> updateInventoryMovement(@PathVariable UUID inventoryMovementId,
                                                     @RequestBody UpdateInventoryRequestDTO request,
                                                     @PathVariable String businessCode,
@@ -47,6 +51,7 @@ public class InventoryController {
     }
 
     @DeleteMapping("/{inventoryMovementId}")
+    @PreAuthorize("hasAuthority('INVENTORY_DELETE')")
     public ResponseEntity<?> deleteInventoryMovement(@PathVariable UUID inventoryMovementId,
                                                     @PathVariable String businessCode,
                                                     @RequestAttribute UserDO userDO) {
@@ -55,6 +60,7 @@ public class InventoryController {
     }
 
     @GetMapping("/product/{productId}")
+    @PreAuthorize("hasAuthority('INVENTORY_READ')")
     public ResponseEntity<?> getInventoryByProduct(@PathVariable UUID productId,
                                                    @PathVariable String businessCode,
                                                    @RequestAttribute UserDO userDO) {
@@ -63,6 +69,7 @@ public class InventoryController {
     }
 
     @GetMapping("/warehouse/{warehouseId}")
+    @PreAuthorize("hasAuthority('INVENTORY_READ')")
     public ResponseEntity<?> getInventoryByWarehouse(@PathVariable UUID warehouseId,
                                                      @PathVariable String businessCode,
                                                      @RequestAttribute UserDO userDO) {
