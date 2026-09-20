@@ -19,5 +19,5 @@ public class WarehouseResponseDTO {
     private String location;
     private String contactPerson;
     private String phone;
-    private Boolean status;
+    private Boolean isActive;
 }

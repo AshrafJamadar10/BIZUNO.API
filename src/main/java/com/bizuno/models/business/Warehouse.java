@@ -40,9 +40,6 @@ public class Warehouse extends BaseEntity {
     @Size(max = 20, message = "Phone must not exceed 20 characters")
     private String phone;
 
-    @NotNull(message = "Status is required")
-    private Boolean status = true;
-
     @OneToMany(mappedBy = "warehouse", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<Inventory> inventories = new ArrayList<>();

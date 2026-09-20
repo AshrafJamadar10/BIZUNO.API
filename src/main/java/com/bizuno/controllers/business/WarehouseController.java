@@ -20,7 +20,7 @@ public class WarehouseController {
     private final WarehouseService warehouseService;
 
     @PostMapping
-    @PreAuthorize("hasAuthority('WAREHOUSES_CREATE')")
+    @PreAuthorize("hasAuthority('WAREHOUSE_CREATE')")
     public ResponseEntity<?> createWarehouse(@RequestBody CreateWarehouseRequestDTO request,
                                             @PathVariable String businessCode,
                                             @RequestAttribute UserDO userDO) {

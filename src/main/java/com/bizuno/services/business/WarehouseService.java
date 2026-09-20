@@ -130,7 +130,6 @@ public class WarehouseService {
             warehouse.setLocation(request.getLocation());
             warehouse.setContactPerson(request.getContactPerson());
             warehouse.setPhone(request.getPhone());
-            warehouse.setStatus(request.getStatus());
             warehouse.preUpdate();
 
             Warehouse updatedWarehouse = warehouseRepository.save(warehouse);
@@ -165,7 +164,7 @@ public class WarehouseService {
                 .location(warehouse.getLocation())
                 .contactPerson(warehouse.getContactPerson())
                 .phone(warehouse.getPhone())
-                .status(warehouse.getStatus())
+                .isActive(warehouse.getIsActive())
                 .build();
     }
 }
