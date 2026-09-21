@@ -6,11 +6,15 @@ import com.bizuno.dtos.business.ReportResponseDTO;
 import com.bizuno.dtos.business.UpdateReportRequestDTO;
 import com.bizuno.dtos.main.CommonResponse;
 import com.bizuno.dtos.main.UserDO;
+import com.bizuno.enums.ModelEnums;
+import com.bizuno.models.business.BusinessUser;
 import com.bizuno.models.business.Report;
 import com.bizuno.models.main.Business;
+import com.bizuno.repositories.business.BusinessUserRepository;
 import com.bizuno.repositories.business.ReportRepository;
 import com.bizuno.repositories.main.BusinessRepository;
 import com.bizuno.utils.TenantTransactionalUtil;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -38,6 +42,11 @@ public class ReportService {
         return tenantTransactionalUtil.excecuteInTenantContext(business.getTenantId(), business.getDbName(), entityManager -> {
             ReportRepository reportRepository = tenantTransactionalUtil.getRepository(entityManager, ReportRepository.class);
 
+            CommonResponse validateUser = validateUser(userDO, entityManager);
+            if (validateUser.getStatus() != AppConstants.STATUS_SUCCESS) {
+                return validateUser;
+            }
+
             Report report = Report.builder()
                     .reportType(request.getReportType())
                     .title(request.getTitle())
@@ -63,6 +72,11 @@ public class ReportService {
 
         return tenantTransactionalUtil.excecuteInTenantContext(business.getTenantId(), business.getDbName(), entityManager -> {
             ReportRepository reportRepository = tenantTransactionalUtil.getRepository(entityManager, ReportRepository.class);
+
+            CommonResponse validateUser = validateUser(userDO, entityManager);
+            if (validateUser.getStatus() != AppConstants.STATUS_SUCCESS) {
+                return validateUser;
+            }
 
             Optional<Report> reportOpt = reportRepository.findById(reportId);
             if (reportOpt.isEmpty()) {
@@ -93,7 +107,12 @@ public class ReportService {
 
         return tenantTransactionalUtil.excecuteInTenantContext(business.getTenantId(), business.getDbName(), entityManager -> {
             ReportRepository reportRepository = tenantTransactionalUtil.getRepository(entityManager, ReportRepository.class);
-            
+
+            CommonResponse validateUser = validateUser(userDO, entityManager);
+            if (validateUser.getStatus() != AppConstants.STATUS_SUCCESS) {
+                return validateUser;
+            }
+
             String sortProp = (sortBy == null || sortBy.isBlank()) ? "generatedAt" : sortBy;
             Sort.Direction direction = (sortDirection != null && sortDirection.equalsIgnoreCase("desc")) ? Sort.Direction.DESC : Sort.Direction.ASC;
             
@@ -128,6 +147,11 @@ public class ReportService {
         return tenantTransactionalUtil.excecuteInTenantContext(business.getTenantId(), business.getDbName(), entityManager -> {
             ReportRepository reportRepository = tenantTransactionalUtil.getRepository(entityManager, ReportRepository.class);
 
+            CommonResponse validateUser = validateUser(userDO, entityManager);
+            if (validateUser.getStatus() != AppConstants.STATUS_SUCCESS) {
+                return validateUser;
+            }
+
             Optional<Report> reportOpt = reportRepository.findById(reportId);
 
             return reportOpt.map(report -> new CommonResponse(AppConstants.STATUS_SUCCESS, "Report retrieved successfully", mapReportToResponse(report))).orElseGet(() -> new CommonResponse(AppConstants.STATUS_NOT_FOUND, String.format(AppConstants.NOT_FOUND, "Report")));
@@ -143,6 +167,11 @@ public class ReportService {
 
         return tenantTransactionalUtil.excecuteInTenantContext(business.getTenantId(), business.getDbName(), entityManager -> {
             ReportRepository reportRepository = tenantTransactionalUtil.getRepository(entityManager, ReportRepository.class);
+
+            CommonResponse validateUser = validateUser(userDO, entityManager);
+            if (validateUser.getStatus() != AppConstants.STATUS_SUCCESS) {
+                return validateUser;
+            }
 
             Optional<Report> reportOpt = reportRepository.findById(reportId);
             if (reportOpt.isEmpty()) {
@@ -165,5 +194,21 @@ public class ReportService {
                 .fileUrl(report.getFileUrl())
                 .paramsJson(report.getParamsJson())
                 .build();
+    }
+
+    private CommonResponse validateUser(UserDO userDO, EntityManager entityManager){
+
+        BusinessUserRepository userRepository = tenantTransactionalUtil.getRepository(entityManager, BusinessUserRepository.class);
+
+        if(userDO == null){
+            return new CommonResponse(AppConstants.STATUS_UNAUTHORIZED, AppConstants.MESSAGE_UNAUTHORIZED);
+        }
+        if (userDO.getUserType().equals(ModelEnums.RoleType.PLATFORM.name())){
+            return new CommonResponse(AppConstants.STATUS_FORBIDDEN, AppConstants.MESSAGE_FORBIDDEN);
+        }
+
+        Optional<BusinessUser> userOpt = userRepository.findById(userDO.getUserId());
+        return userOpt.map(businessUser -> new CommonResponse(AppConstants.STATUS_SUCCESS, AppConstants.MESSAGE_SUCCESS, businessUser)).orElseGet(() -> new CommonResponse(AppConstants.STATUS_UNAUTHORIZED, AppConstants.MESSAGE_UNAUTHORIZED));
+
     }
 }

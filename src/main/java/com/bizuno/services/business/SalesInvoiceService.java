@@ -8,17 +8,13 @@ import com.bizuno.dtos.business.SalesInvoiceResponseDTO;
 import com.bizuno.dtos.business.UpdateSalesInvoiceRequestDTO;
 import com.bizuno.dtos.main.CommonResponse;
 import com.bizuno.dtos.main.UserDO;
-import com.bizuno.models.business.Customer;
-import com.bizuno.models.business.Product;
-import com.bizuno.models.business.SalesInvoice;
-import com.bizuno.models.business.SalesInvoiceItem;
+import com.bizuno.enums.ModelEnums;
+import com.bizuno.models.business.*;
 import com.bizuno.models.main.Business;
-import com.bizuno.repositories.business.CustomerRepository;
-import com.bizuno.repositories.business.ProductRepository;
-import com.bizuno.repositories.business.SalesInvoiceItemRepository;
-import com.bizuno.repositories.business.SalesInvoiceRepository;
+import com.bizuno.repositories.business.*;
 import com.bizuno.repositories.main.BusinessRepository;
 import com.bizuno.utils.TenantTransactionalUtil;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -48,6 +44,11 @@ public class SalesInvoiceService {
             CustomerRepository customerRepository = tenantTransactionalUtil.getRepository(entityManager, CustomerRepository.class);
             ProductRepository productRepository = tenantTransactionalUtil.getRepository(entityManager, ProductRepository.class);
             SalesInvoiceItemRepository salesInvoiceItemRepository = tenantTransactionalUtil.getRepository(entityManager, SalesInvoiceItemRepository.class);
+
+            CommonResponse validateUser = validateUser(userDO, entityManager);
+            if (validateUser.getStatus() != AppConstants.STATUS_SUCCESS) {
+                return validateUser;
+            }
 
             if (salesInvoiceRepository.existsByInvoiceNumber(request.getInvoiceNumber())) {
                 return new CommonResponse(AppConstants.STATUS_CONFLICT, String.format(AppConstants.MESSAGE_EXISTS, "Invoice with this number"));
@@ -116,6 +117,11 @@ public class SalesInvoiceService {
             SalesInvoiceRepository salesInvoiceRepository = tenantTransactionalUtil.getRepository(entityManager, SalesInvoiceRepository.class);
             CustomerRepository customerRepository = tenantTransactionalUtil.getRepository(entityManager, CustomerRepository.class);
 
+            CommonResponse validateUser = validateUser(userDO, entityManager);
+            if (validateUser.getStatus() != AppConstants.STATUS_SUCCESS) {
+                return validateUser;
+            }
+
             Optional<SalesInvoice> invoiceOpt = salesInvoiceRepository.findById(salesInvoiceId);
             if (invoiceOpt.isEmpty()) {
                 return new CommonResponse(AppConstants.STATUS_NOT_FOUND, String.format(AppConstants.NOT_FOUND, "Sales Invoice"));
@@ -162,7 +168,12 @@ public class SalesInvoiceService {
 
         return tenantTransactionalUtil.excecuteInTenantContext(business.getTenantId(), business.getDbName(), entityManager -> {
             SalesInvoiceRepository salesInvoiceRepository = tenantTransactionalUtil.getRepository(entityManager, SalesInvoiceRepository.class);
-            
+
+            CommonResponse validateUser = validateUser(userDO, entityManager);
+            if (validateUser.getStatus() != AppConstants.STATUS_SUCCESS) {
+                return validateUser;
+            }
+
             String sortProp = (sortBy == null || sortBy.isBlank()) ? "issuedAt" : sortBy;
             Sort.Direction direction = (sortDirection != null && sortDirection.equalsIgnoreCase("desc")) ? Sort.Direction.DESC : Sort.Direction.ASC;
             
@@ -197,6 +208,11 @@ public class SalesInvoiceService {
         return tenantTransactionalUtil.excecuteInTenantContext(business.getTenantId(), business.getDbName(), entityManager -> {
             SalesInvoiceRepository salesInvoiceRepository = tenantTransactionalUtil.getRepository(entityManager, SalesInvoiceRepository.class);
 
+            CommonResponse validateUser = validateUser(userDO, entityManager);
+            if (validateUser.getStatus() != AppConstants.STATUS_SUCCESS) {
+                return validateUser;
+            }
+
             Optional<SalesInvoice> invoiceOpt = salesInvoiceRepository.findById(salesInvoiceId);
 
             return invoiceOpt.map(invoice -> new CommonResponse(AppConstants.STATUS_SUCCESS, "Sales Invoice retrieved successfully", mapSalesInvoiceToResponse(invoice))).orElseGet(() -> new CommonResponse(AppConstants.STATUS_NOT_FOUND, String.format(AppConstants.NOT_FOUND, "Sales Invoice")));
@@ -212,6 +228,11 @@ public class SalesInvoiceService {
 
         return tenantTransactionalUtil.excecuteInTenantContext(business.getTenantId(), business.getDbName(), entityManager -> {
             SalesInvoiceRepository salesInvoiceRepository = tenantTransactionalUtil.getRepository(entityManager, SalesInvoiceRepository.class);
+
+            CommonResponse validateUser = validateUser(userDO, entityManager);
+            if (validateUser.getStatus() != AppConstants.STATUS_SUCCESS) {
+                return validateUser;
+            }
 
             Optional<SalesInvoice> invoiceOpt = salesInvoiceRepository.findById(salesInvoiceId);
             if (invoiceOpt.isEmpty()) {
@@ -261,5 +282,21 @@ public class SalesInvoiceService {
                 .lineTotal(item.getLineTotal())
                 .note(item.getNote())
                 .build();
+    }
+
+    private CommonResponse validateUser(UserDO userDO, EntityManager entityManager){
+
+        BusinessUserRepository userRepository = tenantTransactionalUtil.getRepository(entityManager, BusinessUserRepository.class);
+
+        if(userDO == null){
+            return new CommonResponse(AppConstants.STATUS_UNAUTHORIZED, AppConstants.MESSAGE_UNAUTHORIZED);
+        }
+        if (userDO.getUserType().equals(ModelEnums.RoleType.PLATFORM.name())){
+            return new CommonResponse(AppConstants.STATUS_FORBIDDEN, AppConstants.MESSAGE_FORBIDDEN);
+        }
+
+        Optional<BusinessUser> userOpt = userRepository.findById(userDO.getUserId());
+        return userOpt.map(businessUser -> new CommonResponse(AppConstants.STATUS_SUCCESS, AppConstants.MESSAGE_SUCCESS, businessUser)).orElseGet(() -> new CommonResponse(AppConstants.STATUS_UNAUTHORIZED, AppConstants.MESSAGE_UNAUTHORIZED));
+
     }
 }

@@ -6,13 +6,17 @@ import com.bizuno.dtos.business.StaffResponseDTO;
 import com.bizuno.dtos.business.UpdateStaffRequestDTO;
 import com.bizuno.dtos.main.CommonResponse;
 import com.bizuno.dtos.main.UserDO;
+import com.bizuno.enums.ModelEnums;
 import com.bizuno.models.business.BusinessRole;
+import com.bizuno.models.business.BusinessUser;
 import com.bizuno.models.business.Staff;
 import com.bizuno.models.main.Business;
 import com.bizuno.repositories.business.BusinessRoleRepository;
+import com.bizuno.repositories.business.BusinessUserRepository;
 import com.bizuno.repositories.business.StaffRepository;
 import com.bizuno.repositories.main.BusinessRepository;
 import com.bizuno.utils.TenantTransactionalUtil;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -40,6 +44,11 @@ public class StaffService {
         return tenantTransactionalUtil.excecuteInTenantContext(business.getTenantId(), business.getDbName(), entityManager -> {
             StaffRepository staffRepository = tenantTransactionalUtil.getRepository(entityManager, StaffRepository.class);
             BusinessRoleRepository businessRoleRepository = tenantTransactionalUtil.getRepository(entityManager, BusinessRoleRepository.class);
+
+            CommonResponse validateUser = validateUser(userDO, entityManager);
+            if (validateUser.getStatus() != AppConstants.STATUS_SUCCESS) {
+                return validateUser;
+            }
 
             if (staffRepository.existsByEmail(request.getEmail())) {
                 return new CommonResponse(AppConstants.STATUS_CONFLICT, String.format(AppConstants.MESSAGE_EXISTS, "Staff with this email"));
@@ -79,6 +88,11 @@ public class StaffService {
         return tenantTransactionalUtil.excecuteInTenantContext(business.getTenantId(), business.getDbName(), entityManager -> {
             StaffRepository staffRepository = tenantTransactionalUtil.getRepository(entityManager, StaffRepository.class);
             BusinessRoleRepository businessRoleRepository = tenantTransactionalUtil.getRepository(entityManager, BusinessRoleRepository.class);
+
+            CommonResponse validateUser = validateUser(userDO, entityManager);
+            if (validateUser.getStatus() != AppConstants.STATUS_SUCCESS) {
+                return validateUser;
+            }
 
             Optional<Staff> staffOpt = staffRepository.findById(staffId);
             if (staffOpt.isEmpty()) {
@@ -123,7 +137,12 @@ public class StaffService {
 
         return tenantTransactionalUtil.excecuteInTenantContext(business.getTenantId(), business.getDbName(), entityManager -> {
             StaffRepository staffRepository = tenantTransactionalUtil.getRepository(entityManager, StaffRepository.class);
-            
+
+            CommonResponse validateUser = validateUser(userDO, entityManager);
+            if (validateUser.getStatus() != AppConstants.STATUS_SUCCESS) {
+                return validateUser;
+            }
+
             String sortProp = (sortBy == null || sortBy.isBlank()) ? "fullName" : sortBy;
             Sort.Direction direction = (sortDirection != null && sortDirection.equalsIgnoreCase("desc")) ? Sort.Direction.DESC : Sort.Direction.ASC;
             
@@ -158,6 +177,11 @@ public class StaffService {
         return tenantTransactionalUtil.excecuteInTenantContext(business.getTenantId(), business.getDbName(), entityManager -> {
             StaffRepository staffRepository = tenantTransactionalUtil.getRepository(entityManager, StaffRepository.class);
 
+            CommonResponse validateUser = validateUser(userDO, entityManager);
+            if (validateUser.getStatus() != AppConstants.STATUS_SUCCESS) {
+                return validateUser;
+            }
+
             Optional<Staff> staffOpt = staffRepository.findById(staffId);
 
             return staffOpt.map(staff -> new CommonResponse(AppConstants.STATUS_SUCCESS, "Staff retrieved successfully", mapStaffToResponse(staff))).orElseGet(() -> new CommonResponse(AppConstants.STATUS_NOT_FOUND, String.format(AppConstants.NOT_FOUND, "Staff")));
@@ -173,6 +197,11 @@ public class StaffService {
 
         return tenantTransactionalUtil.excecuteInTenantContext(business.getTenantId(), business.getDbName(), entityManager -> {
             StaffRepository staffRepository = tenantTransactionalUtil.getRepository(entityManager, StaffRepository.class);
+
+            CommonResponse validateUser = validateUser(userDO, entityManager);
+            if (validateUser.getStatus() != AppConstants.STATUS_SUCCESS) {
+                return validateUser;
+            }
 
             Optional<Staff> staffOpt = staffRepository.findById(staffId);
             if (staffOpt.isEmpty()) {
@@ -197,5 +226,21 @@ public class StaffService {
                 .roleId(staff.getRole() != null ? staff.getRole().getRoleId() : null)
                 .roleName(staff.getRole() != null ? staff.getRole().getName() : null)
                 .build();
+    }
+
+    private CommonResponse validateUser(UserDO userDO, EntityManager entityManager){
+
+        BusinessUserRepository userRepository = tenantTransactionalUtil.getRepository(entityManager, BusinessUserRepository.class);
+
+        if(userDO == null){
+            return new CommonResponse(AppConstants.STATUS_UNAUTHORIZED, AppConstants.MESSAGE_UNAUTHORIZED);
+        }
+        if (userDO.getUserType().equals(ModelEnums.RoleType.PLATFORM.name())){
+            return new CommonResponse(AppConstants.STATUS_FORBIDDEN, AppConstants.MESSAGE_FORBIDDEN);
+        }
+
+        Optional<BusinessUser> userOpt = userRepository.findById(userDO.getUserId());
+        return userOpt.map(businessUser -> new CommonResponse(AppConstants.STATUS_SUCCESS, AppConstants.MESSAGE_SUCCESS, businessUser)).orElseGet(() -> new CommonResponse(AppConstants.STATUS_UNAUTHORIZED, AppConstants.MESSAGE_UNAUTHORIZED));
+
     }
 }
