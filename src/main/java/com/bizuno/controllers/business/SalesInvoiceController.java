@@ -7,6 +7,7 @@ import com.bizuno.dtos.main.UserDO;
 import com.bizuno.services.business.SalesInvoiceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -19,6 +20,7 @@ public class SalesInvoiceController {
     private final SalesInvoiceService salesInvoiceService;
 
     @PostMapping
+    @PreAuthorize("hasAuthority('SALES_INVOICE_CREATE')")
     public ResponseEntity<?> createSalesInvoice(@RequestBody CreateSalesInvoiceRequestDTO request,
                                                   @PathVariable String businessCode,
                                                   @RequestAttribute UserDO userDO) {
@@ -27,6 +29,7 @@ public class SalesInvoiceController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAuthority('SALES_INVOICE_READ')")
     public ResponseEntity<?> getAllSalesInvoices(@RequestParam(defaultValue = "0") int page,
                                                  @RequestParam(defaultValue = "10") int size,
                                                  @RequestParam(required = false) String sortBy,
@@ -38,6 +41,7 @@ public class SalesInvoiceController {
     }
 
     @GetMapping("/{salesInvoiceId}")
+    @PreAuthorize("hasAuthority('SALES_INVOICE_READ')")
     public ResponseEntity<?> getSalesInvoiceById(@PathVariable UUID salesInvoiceId,
                                                 @PathVariable String businessCode,
                                                 @RequestAttribute UserDO userDO) {
@@ -46,6 +50,7 @@ public class SalesInvoiceController {
     }
 
     @PutMapping("/{salesInvoiceId}")
+    @PreAuthorize("hasAuthority('SALES_INVOICE_UPDATE')")
     public ResponseEntity<?> updateSalesInvoice(@PathVariable UUID salesInvoiceId,
                                                @RequestBody UpdateSalesInvoiceRequestDTO request,
                                                @PathVariable String businessCode,
@@ -55,6 +60,7 @@ public class SalesInvoiceController {
     }
 
     @DeleteMapping("/{salesInvoiceId}")
+    @PreAuthorize("hasAuthority('SALES_INVOICE_DELETE')")
     public ResponseEntity<?> deleteSalesInvoice(@PathVariable UUID salesInvoiceId,
                                                 @PathVariable String businessCode,
                                                 @RequestAttribute UserDO userDO) {

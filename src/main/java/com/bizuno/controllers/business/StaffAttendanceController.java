@@ -7,6 +7,7 @@ import com.bizuno.dtos.main.UserDO;
 import com.bizuno.services.business.StaffAttendanceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -19,6 +20,7 @@ public class StaffAttendanceController {
     private final StaffAttendanceService staffAttendanceService;
 
     @PostMapping
+    @PreAuthorize("hasAuthority('ATTENDANCE_CREATE')")
     public ResponseEntity<?> createStaffAttendance(@RequestBody CreateStaffAttendanceRequestDTO request,
                                                      @PathVariable String businessCode,
                                                      @RequestAttribute UserDO userDO) {
@@ -27,6 +29,7 @@ public class StaffAttendanceController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAuthority('ATTENDANCE_READ')")
     public ResponseEntity<?> getAllStaffAttendance(@RequestParam(defaultValue = "0") int page,
                                                     @RequestParam(defaultValue = "10") int size,
                                                     @RequestParam(required = false) String sortBy,
@@ -38,6 +41,7 @@ public class StaffAttendanceController {
     }
 
     @GetMapping("/{staffAttendanceId}")
+    @PreAuthorize("hasAuthority('ATTENDANCE_READ')")
     public ResponseEntity<?> getStaffAttendanceById(@PathVariable UUID staffAttendanceId,
                                                    @PathVariable String businessCode,
                                                    @RequestAttribute UserDO userDO) {
@@ -46,6 +50,7 @@ public class StaffAttendanceController {
     }
 
     @PutMapping("/{staffAttendanceId}")
+    @PreAuthorize("hasAuthority('ATTENDANCE_UPDATE')")
     public ResponseEntity<?> updateStaffAttendance(@PathVariable UUID staffAttendanceId,
                                                   @RequestBody UpdateStaffAttendanceRequestDTO request,
                                                   @PathVariable String businessCode,
@@ -55,6 +60,7 @@ public class StaffAttendanceController {
     }
 
     @DeleteMapping("/{staffAttendanceId}")
+    @PreAuthorize("hasAuthority('ATTENDANCE_DELETE')")
     public ResponseEntity<?> deleteStaffAttendance(@PathVariable UUID staffAttendanceId,
                                                    @PathVariable String businessCode,
                                                    @RequestAttribute UserDO userDO) {

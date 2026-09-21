@@ -7,6 +7,7 @@ import com.bizuno.dtos.main.UserDO;
 import com.bizuno.services.business.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -19,6 +20,7 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping
+    @PreAuthorize("hasAuthority('PRODUCT_CREATE')")
     public ResponseEntity<?> createProduct(@RequestBody CreateProductRequestDTO request,
                                            @PathVariable String businessCode,
                                            @RequestAttribute UserDO userDO) {
@@ -27,6 +29,7 @@ public class ProductController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAuthority('PRODUCT_READ')")
     public ResponseEntity<?> getAllProducts(@RequestParam(defaultValue = "0") int page,
                                            @RequestParam(defaultValue = "10") int size,
                                            @RequestParam(required = false) String sortBy,
@@ -38,6 +41,7 @@ public class ProductController {
     }
 
     @GetMapping("/{productId}")
+    @PreAuthorize("hasAuthority('PRODUCT_READ')")
     public ResponseEntity<?> getProductById(@PathVariable UUID productId,
                                            @PathVariable String businessCode,
                                            @RequestAttribute UserDO userDO) {
@@ -46,6 +50,7 @@ public class ProductController {
     }
 
     @PutMapping("/{productId}")
+    @PreAuthorize("hasAuthority('PRODUCT_UPDATE')")
     public ResponseEntity<?> updateProduct(@PathVariable UUID productId,
                                            @RequestBody UpdateProductRequestDTO request,
                                            @PathVariable String businessCode,
@@ -55,6 +60,7 @@ public class ProductController {
     }
 
     @DeleteMapping("/{productId}")
+    @PreAuthorize("hasAuthority('PRODUCT_DELETE')")
     public ResponseEntity<?> deleteProduct(@PathVariable UUID productId,
                                            @PathVariable String businessCode,
                                            @RequestAttribute UserDO userDO) {

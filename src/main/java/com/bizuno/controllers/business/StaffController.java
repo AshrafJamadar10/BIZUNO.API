@@ -7,6 +7,7 @@ import com.bizuno.dtos.main.UserDO;
 import com.bizuno.services.business.StaffService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -19,6 +20,7 @@ public class StaffController {
     private final StaffService staffService;
 
     @PostMapping
+    @PreAuthorize("hasAuthority('STAFF_CREATE')")
     public ResponseEntity<?> createStaff(@RequestBody CreateStaffRequestDTO request,
                                          @PathVariable String businessCode,
                                          @RequestAttribute UserDO userDO) {
@@ -27,6 +29,7 @@ public class StaffController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAuthority('STAFF_READ')")
     public ResponseEntity<?> getAllStaff(@RequestParam(defaultValue = "0") int page,
                                           @RequestParam(defaultValue = "10") int size,
                                           @RequestParam(required = false) String sortBy,
@@ -38,6 +41,7 @@ public class StaffController {
     }
 
     @GetMapping("/{staffId}")
+    @PreAuthorize("hasAuthority('STAFF_READ')")
     public ResponseEntity<?> getStaffById(@PathVariable UUID staffId,
                                          @PathVariable String businessCode,
                                          @RequestAttribute UserDO userDO) {
@@ -46,6 +50,7 @@ public class StaffController {
     }
 
     @PutMapping("/{staffId}")
+    @PreAuthorize("hasAuthority('STAFF_UPDATE')")
     public ResponseEntity<?> updateStaff(@PathVariable UUID staffId,
                                         @RequestBody UpdateStaffRequestDTO request,
                                         @PathVariable String businessCode,
@@ -55,6 +60,7 @@ public class StaffController {
     }
 
     @DeleteMapping("/{staffId}")
+    @PreAuthorize("hasAuthority('STAFF_DELETE')")
     public ResponseEntity<?> deleteStaff(@PathVariable UUID staffId,
                                          @PathVariable String businessCode,
                                          @RequestAttribute UserDO userDO) {

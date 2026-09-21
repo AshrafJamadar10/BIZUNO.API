@@ -20,7 +20,7 @@ public class PaymentController {
     private final PaymentService paymentService;
 
     @PostMapping
-    @PreAuthorize("hasAuthority('PAYMENTS_CREATE')")
+    @PreAuthorize("hasAuthority('PAYMENT_CREATE')")
     public ResponseEntity<?> createPayment(@RequestBody CreatePaymentRequestDTO request,
                                             @PathVariable String businessCode,
                                             @RequestAttribute UserDO userDO) {
@@ -29,7 +29,7 @@ public class PaymentController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('PAYMENTS_READ')")
+    @PreAuthorize("hasAuthority('PAYMENT_READ')")
     public ResponseEntity<?> getAllPayments(@RequestParam(defaultValue = "0") int page,
                                            @RequestParam(defaultValue = "10") int size,
                                            @RequestParam(required = false) String sortBy,
@@ -41,7 +41,7 @@ public class PaymentController {
     }
 
     @GetMapping("/{paymentId}")
-    @PreAuthorize("hasAuthority('PAYMENTS_READ')")
+    @PreAuthorize("hasAuthority('PAYMENT_READ')")
     public ResponseEntity<?> getPaymentById(@PathVariable UUID paymentId,
                                            @PathVariable String businessCode,
                                            @RequestAttribute UserDO userDO) {
@@ -50,7 +50,7 @@ public class PaymentController {
     }
 
     @PutMapping("/{paymentId}")
-    @PreAuthorize("hasAuthority('PAYMENTS_UPDATE')")
+    @PreAuthorize("hasAuthority('PAYMENT_UPDATE')")
     public ResponseEntity<?> updatePayment(@PathVariable UUID paymentId,
                                          @RequestBody UpdatePaymentRequestDTO request,
                                          @PathVariable String businessCode,
@@ -60,7 +60,7 @@ public class PaymentController {
     }
 
     @DeleteMapping("/{paymentId}")
-    @PreAuthorize("hasAuthority('PAYMENTS_DELETE')")
+    @PreAuthorize("hasAuthority('PAYMENT_DELETE')")
     public ResponseEntity<?> deletePayment(@PathVariable UUID paymentId,
                                            @PathVariable String businessCode,
                                            @RequestAttribute UserDO userDO) {

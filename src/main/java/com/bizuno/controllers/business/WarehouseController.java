@@ -29,6 +29,7 @@ public class WarehouseController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAuthority('WAREHOUSE_READ')")
     public ResponseEntity<?> getAllWarehouses(@RequestParam(defaultValue = "0") int page,
                                              @RequestParam(defaultValue = "10") int size,
                                              @RequestParam(required = false) String sortBy,
@@ -40,6 +41,7 @@ public class WarehouseController {
     }
 
     @GetMapping("/{warehouseId}")
+    @PreAuthorize("hasAuthority('WAREHOUSE_READ')")
     public ResponseEntity<?> getWarehouseById(@PathVariable UUID warehouseId,
                                              @PathVariable String businessCode,
                                              @RequestAttribute UserDO userDO) {
@@ -48,6 +50,7 @@ public class WarehouseController {
     }
 
     @PutMapping("/{warehouseId}")
+    @PreAuthorize("hasAuthority('WAREHOUSE_UPDATE')")
     public ResponseEntity<?> updateWarehouse(@PathVariable UUID warehouseId,
                                             @RequestBody UpdateWarehouseRequestDTO request,
                                             @PathVariable String businessCode,
@@ -57,6 +60,7 @@ public class WarehouseController {
     }
 
     @DeleteMapping("/{warehouseId}")
+    @PreAuthorize("hasAuthority('WAREHOUSE_DELETE')")
     public ResponseEntity<?> deleteWarehouse(@PathVariable UUID warehouseId,
                                             @PathVariable String businessCode,
                                             @RequestAttribute UserDO userDO) {

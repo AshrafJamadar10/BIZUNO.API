@@ -7,6 +7,7 @@ import com.bizuno.dtos.main.UserDO;
 import com.bizuno.services.business.PurchaseOrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -19,6 +20,7 @@ public class PurchaseOrderController {
     private final PurchaseOrderService purchaseOrderService;
 
     @PostMapping
+    @PreAuthorize("hasAuthority('PURCHASE_CREATE')")
     public ResponseEntity<?> createPurchaseOrder(@RequestBody CreatePurchaseOrderRequestDTO request,
                                                   @PathVariable String businessCode,
                                                   @RequestAttribute UserDO userDO) {
@@ -27,6 +29,7 @@ public class PurchaseOrderController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAuthority('PURCHASE_READ')")
     public ResponseEntity<?> getAllPurchaseOrders(@RequestParam(defaultValue = "0") int page,
                                                   @RequestParam(defaultValue = "10") int size,
                                                   @RequestParam(required = false) String sortBy,
@@ -38,6 +41,7 @@ public class PurchaseOrderController {
     }
 
     @GetMapping("/{purchaseOrderId}")
+    @PreAuthorize("hasAuthority('PURCHASE_READ')")
     public ResponseEntity<?> getPurchaseOrderById(@PathVariable UUID purchaseOrderId,
                                                   @PathVariable String businessCode,
                                                   @RequestAttribute UserDO userDO) {
@@ -46,6 +50,7 @@ public class PurchaseOrderController {
     }
 
     @PutMapping("/{purchaseOrderId}")
+    @PreAuthorize("hasAuthority('PURCHASE_UPDATE')")
     public ResponseEntity<?> updatePurchaseOrder(@PathVariable UUID purchaseOrderId,
                                                @RequestBody UpdatePurchaseOrderRequestDTO request,
                                                @PathVariable String businessCode,
@@ -55,6 +60,7 @@ public class PurchaseOrderController {
     }
 
     @DeleteMapping("/{purchaseOrderId}")
+    @PreAuthorize("hasAuthority('PURCHASE_DELETE')")
     public ResponseEntity<?> deletePurchaseOrder(@PathVariable UUID purchaseOrderId,
                                                   @PathVariable String businessCode,
                                                   @RequestAttribute UserDO userDO) {

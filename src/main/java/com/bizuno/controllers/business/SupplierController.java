@@ -7,6 +7,7 @@ import com.bizuno.dtos.main.UserDO;
 import com.bizuno.services.business.SupplierService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -19,6 +20,7 @@ public class SupplierController {
     private final SupplierService supplierService;
 
     @PostMapping
+    @PreAuthorize("hasAuthority('SUPPLIER_CREATE')")
     public ResponseEntity<?> createSupplier(@RequestBody CreateSupplierRequestDTO request,
                                              @PathVariable String businessCode,
                                              @RequestAttribute UserDO userDO) {
@@ -27,6 +29,7 @@ public class SupplierController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAuthority('SUPPLIER_READ')")
     public ResponseEntity<?> getAllSuppliers(@RequestParam(defaultValue = "0") int page,
                                              @RequestParam(defaultValue = "10") int size,
                                              @RequestParam(required = false) String sortBy,
@@ -38,6 +41,7 @@ public class SupplierController {
     }
 
     @GetMapping("/{supplierId}")
+    @PreAuthorize("hasAuthority('SUPPLIER_READ')")
     public ResponseEntity<?> getSupplierById(@PathVariable UUID supplierId,
                                             @PathVariable String businessCode,
                                             @RequestAttribute UserDO userDO) {
@@ -46,6 +50,7 @@ public class SupplierController {
     }
 
     @PutMapping("/{supplierId}")
+    @PreAuthorize("hasAuthority('SUPPLIER_UPDATE')")
     public ResponseEntity<?> updateSupplier(@PathVariable UUID supplierId,
                                            @RequestBody UpdateSupplierRequestDTO request,
                                            @PathVariable String businessCode,
@@ -55,6 +60,7 @@ public class SupplierController {
     }
 
     @DeleteMapping("/{supplierId}")
+    @PreAuthorize("hasAuthority('SUPPLIER_DELETE')")
     public ResponseEntity<?> deleteSupplier(@PathVariable UUID supplierId,
                                             @PathVariable String businessCode,
                                             @RequestAttribute UserDO userDO) {
