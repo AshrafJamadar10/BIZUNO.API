@@ -56,7 +56,8 @@ public class SecurityConfig {
                     "/favicon.ico",
                     "/error",
                     "/bizuno/auth/**",
-                    "/bizuno/**"
+                    "/bizuno/**",
+                    "/uploads/**"
                 ).permitAll()
                 .anyRequest().authenticated()
             )

@@ -24,7 +24,8 @@ public class WebConfig implements WebMvcConfigurer {
                 "/webjars/**",
                 "/favicon.ico",
                 "/error",
-                "/bizuno/auth/**"
+                "/bizuno/auth/**",
+                "/uploads/**"
             );
     }
 }
