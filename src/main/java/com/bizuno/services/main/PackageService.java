@@ -159,6 +159,10 @@ public class PackageService {
         return new CommonResponse(AppConstants.STATUS_SUCCESS, String.format(AppConstants.MESSAGE_DELETED_SUCCESS, "Package"));
     }
 
+    public CommonResponse getScopes() {
+        return new CommonResponse(AppConstants.STATUS_SUCCESS, AppConstants.MESSAGE_SUCCESS, ModelEnums.CrudPermissionScopesBusiness.getAllValues());
+    }
+
     private Package mapRequestToEntity(PackageRequestDTO request) {
         Package packageEntity = new Package();
         packageEntity.setName(request.getName());

@@ -22,8 +22,8 @@ public class AuthController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @PostMapping("/register/business")
-    public ResponseEntity<?> register(@RequestBody @Valid CreateBusinessRequestDTO createBusinessRequestDTO) {
+    @PostMapping(value = "/register/business", consumes = {"multipart/form-data"})
+    public ResponseEntity<?> register(@ModelAttribute @Valid CreateBusinessRequestDTO createBusinessRequestDTO) {
         CommonResponse response = authService.register(createBusinessRequestDTO);
         return ResponseEntity.status(response.getStatus()).body(response);
     }

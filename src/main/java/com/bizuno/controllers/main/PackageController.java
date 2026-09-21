@@ -50,4 +50,10 @@ public class PackageController {
         CommonResponse response = packageService.deletePackage(packageId);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
+
+    @GetMapping("/scopes")
+    public ResponseEntity<?> getScopes() {
+        CommonResponse response = packageService.getScopes();
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
 }
