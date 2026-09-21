@@ -31,6 +31,14 @@ public class InventoryController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
+    @GetMapping("/summary")
+    @PreAuthorize("hasAuthority('INVENTORY_READ')")
+    public ResponseEntity<?> getInventorySummary(@PathVariable String businessCode,
+                                                  @RequestAttribute UserDO userDO) {
+        CommonResponse response = inventoryService.getInventorySummary(businessCode, userDO);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
     @GetMapping("/{inventoryMovementId}")
     @PreAuthorize("hasAuthority('INVENTORY_READ')")
     public ResponseEntity<?> getInventoryMovementById(@PathVariable UUID inventoryMovementId,

@@ -23,9 +23,6 @@ public class UpdateProductRequestDTO {
     @Pattern(regexp = RegexPatterns.REGEX_LETTERS_NUMBERS_AND_SPACES, message = "Name should contain only letters, numbers, and spaces")
     private String name;
 
-    @Size(max = 50, message = "SKU must not exceed 50 characters")
-    private String sku;
-
     @Size(max = 50, message = "Barcode must not exceed 50 characters")
     private String barcode;
 

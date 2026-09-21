@@ -1,9 +1,12 @@
 package com.bizuno.exception;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -12,8 +15,10 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
     @ExceptionHandler(TenantDatabaseException.class)
-    public ResponseEntity<Map<String, Object>> handleTenantDatabaseException(TenantDatabaseException ex) {
+    public ResponseEntity<Map<String, Object>> handleTenantDatabaseException(TenantDatabaseException ex, WebRequest request) {
         Map<String, Object> response = new HashMap<>();
         response.put("timestamp", LocalDateTime.now());
         response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
@@ -24,7 +29,11 @@ public class GlobalExceptionHandler {
         }
         response.put("tenantId", ex.getTenantId());
         response.put("databaseName", ex.getDatabaseName());
-        
+
+        Throwable rootCause = ex.getCause();
+
+        logger.error("URI= {} | Error= {}", request.getDescription(false), rootCause.getMessage());
+
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 

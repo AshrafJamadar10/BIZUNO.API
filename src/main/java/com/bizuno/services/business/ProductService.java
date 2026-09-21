@@ -73,7 +73,7 @@ public class ProductService {
             Product product = Product.builder()
                     .category(category)
                     .name(request.getName())
-                    .sku(generateSku(request, category != null ? category.getName() : ""))
+                    .sku(generateSku(request.getName(), category != null ? category.getName() : ""))
                     .barcode(request.getBarcode())
                     .description(request.getDescription())
                     .unit(request.getUnit())
@@ -193,11 +193,13 @@ public class ProductService {
                 if (categoryOpt.isEmpty()) {
                     return new CommonResponse(AppConstants.STATUS_NOT_FOUND, String.format(AppConstants.NOT_FOUND, "Category"));
                 }
+                if (!product.getCategory().equals(categoryOpt.get())){
+                    product.setSku(generateSku(request.getName(), categoryOpt.get().getName()));
+                }
                 product.setCategory(categoryOpt.get());
             }
 
             product.setName(request.getName());
-            product.setSku(request.getSku());
             product.setBarcode(request.getBarcode());
             product.setDescription(request.getDescription());
             product.setUnit(request.getUnit());
@@ -255,11 +257,11 @@ public class ProductService {
                 .build();
     }
 
-    private String generateSku(CreateProductRequestDTO requestDTO, String category) {
+    private String generateSku(String productName, String category) {
         if (category.isEmpty()){
             category = UUID.randomUUID().toString().substring(0, 3).toUpperCase();
         }
-        return requestDTO.getName().substring(0, 3).toUpperCase() +"-"+ category.substring(0, 3).toUpperCase() +"-"+ UUID.randomUUID().toString().substring(0, 3).toUpperCase();
+        return productName.substring(0, 3).toUpperCase() +"-"+ category.substring(0, 3).toUpperCase() +"-"+ UUID.randomUUID().toString().substring(0, 3).toUpperCase();
     }
 
     private CommonResponse validateUser(UserDO userDO, EntityManager entityManager){

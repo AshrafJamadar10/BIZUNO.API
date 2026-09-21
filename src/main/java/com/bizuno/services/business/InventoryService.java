@@ -1,8 +1,8 @@
 package com.bizuno.services.business;
 
 import com.bizuno.constants.AppConstants;
-import com.bizuno.dtos.business.CreateInventoryRequestDTO;
 import com.bizuno.dtos.business.InventoryResponseDTO;
+import com.bizuno.dtos.business.InventorySummaryResponseDTO;
 import com.bizuno.dtos.business.UpdateInventoryRequestDTO;
 import com.bizuno.dtos.main.CommonResponse;
 import com.bizuno.dtos.main.UserDO;
@@ -23,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -32,6 +33,55 @@ public class InventoryService {
 
     private final TenantTransactionalUtil tenantTransactionalUtil;
     private final BusinessRepository businessRepository;
+
+    public CommonResponse getInventorySummary(String businessCode, UserDO userDO) {
+        Optional<Business> businessOpt = businessRepository.findByBusinessCode(businessCode);
+        if (businessOpt.isEmpty()) {
+            return new CommonResponse(AppConstants.STATUS_NOT_FOUND, String.format(AppConstants.NOT_FOUND, "Business"));
+        }
+        Business business = businessOpt.get();
+
+        return tenantTransactionalUtil.excecuteInTenantContext(business.getTenantId(), business.getDbName(), entityManager -> {
+            InventoryRepository inventoryRepository = tenantTransactionalUtil.getRepository(entityManager, InventoryRepository.class);
+            CommonResponse validateUser = validateUser(userDO, entityManager);
+            if (validateUser.getStatus() != AppConstants.STATUS_SUCCESS) {
+                return validateUser;
+            }
+
+            List<Inventory> inventory = inventoryRepository.findAll();
+            Set<UUID> productIds = new HashSet<>();
+            long totalUnits = 0;
+            long lowStock = 0;
+            long outOfStock = 0;
+            BigDecimal stockValue = BigDecimal.ZERO;
+
+            for (Inventory item : inventory) {
+                if (item.getProduct() != null) {
+                    productIds.add(item.getProduct().getProductId());
+                    int quantity = Optional.ofNullable(item.getQuantity()).orElse(0);
+                    int minimum = Optional.ofNullable(item.getProduct().getMinStock()).orElse(0);
+                    totalUnits += quantity;
+                    if (quantity <= 0) {
+                        outOfStock++;
+                    } else if (quantity <= minimum) {
+                        lowStock++;
+                    }
+                    if (item.getProduct().getPurchasePrice() != null) {
+                        stockValue = stockValue.add(item.getProduct().getPurchasePrice().multiply(BigDecimal.valueOf(quantity)));
+                    }
+                }
+            }
+
+            InventorySummaryResponseDTO summary = InventorySummaryResponseDTO.builder()
+                    .totalProducts(productIds.size())
+                    .totalUnits(totalUnits)
+                    .lowStock(lowStock)
+                    .outOfStock(outOfStock)
+                    .stockValue(stockValue)
+                    .build();
+            return new CommonResponse(AppConstants.STATUS_SUCCESS, AppConstants.MESSAGE_SUCCESS, summary);
+        });
+    }
 
     public CommonResponse getAllInventoryMovements(String businessCode, UserDO userDO, int page, int size, String sortBy, String sortDirection) {
         Optional<Business> businessOpt = businessRepository.findByBusinessCode(businessCode);
@@ -132,7 +182,7 @@ public class InventoryService {
                 inventory.setWarehouse(warehouseOpt.get());
             }
 
-//            inventory.setMovementType(request.getMovementType());
+            inventory.setMovementType(request.getMovementType());
             inventory.setQuantity(request.getQuantity());
             inventory.setNote(request.getNote());
             inventory.preUpdate();
@@ -241,7 +291,10 @@ public class InventoryService {
                 .productSku(inventory.getProduct() != null ? inventory.getProduct().getSku() : null)
                 .warehouseId(inventory.getWarehouse() != null ? inventory.getWarehouse().getWarehouseId() : null)
                 .warehouseName(inventory.getWarehouse() != null ? inventory.getWarehouse().getName() : null)
-//                .movementType(inventory.getMovementType())
+                .productUnit(inventory.getProduct() != null ? inventory.getProduct().getUnit() : null)
+                .minStock(inventory.getProduct() != null ? inventory.getProduct().getMinStock() : null)
+                .purchasePrice(inventory.getProduct() != null ? inventory.getProduct().getPurchasePrice() : null)
+                .movementType(inventory.getMovementType())
                 .quantity(inventory.getQuantity())
                 .note(inventory.getNote())
                 .createdAt(inventory.getCreatedDate())

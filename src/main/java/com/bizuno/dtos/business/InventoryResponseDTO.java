@@ -17,6 +17,9 @@ public class InventoryResponseDTO {
     private UUID productId;
     private String productName;
     private String productSku;
+    private String productUnit;
+    private Integer minStock;
+    private java.math.BigDecimal purchasePrice;
     private UUID warehouseId;
     private String warehouseName;
     private ModelEnums.MovementType movementType;

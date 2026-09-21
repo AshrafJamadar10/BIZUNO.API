@@ -170,8 +170,6 @@ public class BusinessDatabaseConfig {
 
             return result;
 
-        } catch (TenantDatabaseException e){
-            throw new TenantDatabaseException(e.getMessage(), e.getTenantId(), e.getDatabaseName());
         } catch (Exception e) {
             if (transaction != null && transaction.isActive()) {
                 try {
