@@ -30,8 +30,8 @@ public class BusinessStartupInitializer implements CommandLineRunner {
 
         for (Business business : businesses) {
             try {
-                log.info("Recreating EntityManagerFactory for tenant: {} (database: {})",
-                        business.getTenantId(), business.getDbName());
+                log.info("Recreating EntityManagerFactory for tenant: {} (database: {}, code: {})",
+                        business.getTenantId(), business.getDbName(), business.getBusinessCode());
 
                 businessDatabaseConfig.getOrCreateTenantEntityManagerFactory(
                     business.getTenantId(),
