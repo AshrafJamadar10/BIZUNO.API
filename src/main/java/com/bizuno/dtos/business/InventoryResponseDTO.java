@@ -22,7 +22,7 @@ public class InventoryResponseDTO {
     private java.math.BigDecimal purchasePrice;
     private UUID warehouseId;
     private String warehouseName;
-    private ModelEnums.MovementType movementType;
+//    private ModelEnums.MovementType movementType;
     private Integer quantity;
     private String note;
     @JsonFormat(pattern = "dd-MM-yyyy HH:mm:ss")

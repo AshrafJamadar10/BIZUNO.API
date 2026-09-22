@@ -59,7 +59,6 @@ public class CustomerService {
 
             Customer customer = Customer.builder()
                     .name(request.getName())
-                    .contactPerson(request.getContactPerson())
                     .email(request.getEmail())
                     .phone(request.getPhone())
                     .city(request.getCity())
@@ -106,7 +105,6 @@ public class CustomerService {
             }
 
             customer.setName(request.getName());
-            customer.setContactPerson(request.getContactPerson());
             customer.setEmail(request.getEmail());
             customer.setPhone(request.getPhone());
             customer.setCity(request.getCity());
@@ -210,7 +208,6 @@ public class CustomerService {
         return CustomerResponseDTO.builder()
                 .customerId(customer.getCustomerId())
                 .name(customer.getName())
-                .contactPerson(customer.getContactPerson())
                 .email(customer.getEmail())
                 .phone(customer.getPhone())
                 .city(customer.getCity())

@@ -98,7 +98,7 @@ public class InventoryService {
                 return validateUser;
             }
 
-            String sortProp = (sortBy == null || sortBy.isBlank()) ? "createdBy" : sortBy;
+            String sortProp = (sortBy == null || sortBy.isBlank()) ? "createdDate" : sortBy;
             Sort.Direction direction = (sortDirection != null && sortDirection.equalsIgnoreCase("desc")) ? Sort.Direction.DESC : Sort.Direction.ASC;
 
             Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortProp));
@@ -153,7 +153,6 @@ public class InventoryService {
 
         return tenantTransactionalUtil.excecuteInTenantContext(business.getTenantId(), business.getDbName(), entityManager -> {
             InventoryRepository inventoryRepository = tenantTransactionalUtil.getRepository(entityManager, InventoryRepository.class);
-            ProductRepository productRepository = tenantTransactionalUtil.getRepository(entityManager, ProductRepository.class);
             WarehouseRepository warehouseRepository = tenantTransactionalUtil.getRepository(entityManager, WarehouseRepository.class);
 
             CommonResponse validateUser = validateUser(userDO, entityManager);
@@ -168,12 +167,6 @@ public class InventoryService {
 
             Inventory inventory = inventoryOpt.get();
 
-            Optional<Product> productOpt = productRepository.findById(request.getProductId());
-            if (productOpt.isEmpty()) {
-                return new CommonResponse(AppConstants.STATUS_NOT_FOUND, String.format(AppConstants.NOT_FOUND, "Product"));
-            }
-            inventory.setProduct(productOpt.get());
-
             if (request.getWarehouseId() != null) {
                 Optional<Warehouse> warehouseOpt = warehouseRepository.findById(request.getWarehouseId());
                 if (warehouseOpt.isEmpty()) {
@@ -182,8 +175,10 @@ public class InventoryService {
                 inventory.setWarehouse(warehouseOpt.get());
             }
 
-            inventory.setMovementType(request.getMovementType());
-            inventory.setQuantity(request.getQuantity());
+//            inventory.setMovementType(request.getMovementType());
+            if (request.getQuantity() != null) {
+                inventory.setQuantity(request.getQuantity());
+            }
             inventory.setNote(request.getNote());
             inventory.preUpdate();
 
@@ -294,7 +289,7 @@ public class InventoryService {
                 .productUnit(inventory.getProduct() != null ? inventory.getProduct().getUnit() : null)
                 .minStock(inventory.getProduct() != null ? inventory.getProduct().getMinStock() : null)
                 .purchasePrice(inventory.getProduct() != null ? inventory.getProduct().getPurchasePrice() : null)
-                .movementType(inventory.getMovementType())
+//                .movementType(inventory.getMovementType())
                 .quantity(inventory.getQuantity())
                 .note(inventory.getNote())
                 .createdAt(inventory.getCreatedDate())

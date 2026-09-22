@@ -160,7 +160,7 @@ public class PackageService {
     }
 
     public CommonResponse getScopes() {
-        return new CommonResponse(AppConstants.STATUS_SUCCESS, AppConstants.MESSAGE_SUCCESS, ModelEnums.CrudPermissionScopesBusiness.getAllValues());
+        return new CommonResponse(AppConstants.STATUS_SUCCESS, AppConstants.MESSAGE_SUCCESS, ModelEnums.CrudPermissionScopes.getAllValues());
     }
 
     private Package mapRequestToEntity(PackageRequestDTO request) {

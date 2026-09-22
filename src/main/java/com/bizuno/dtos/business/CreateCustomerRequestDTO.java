@@ -16,9 +16,6 @@ public class CreateCustomerRequestDTO {
     @Pattern(regexp = RegexPatterns.REGEX_LETTERS_AND_SPACES, message = "Name must contain only letters and spaces")
     private String name;
 
-    @Size(max = 100, message = "Contact person must not exceed 100 characters")
-    private String contactPerson;
-
     @Email(message = "Email should be valid")
     @Size(max = 100, message = "Email must not exceed 100 characters")
     private String email;
