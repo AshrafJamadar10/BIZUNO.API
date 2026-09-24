@@ -249,4 +249,49 @@ public class ModelEnums {
             return values();
         }
     }
+
+    public enum CustomFieldDataType {
+        SHORT_TEXT,
+        LONG_TEXT,
+        NUMBER,
+        DECIMAL,
+        DATE,
+        DATE_TIME,
+        BOOLEAN,
+        SELECT,
+        MULTI_SELECT,
+        EMAIL,
+        PHONE,
+        URL;
+
+        public static CustomFieldDataType[] getAllValues() {
+            return values();
+        }
+    }
+
+    public enum CustomFieldTab{
+        PRODUCT,
+        CATEGORY,
+        CUSTOMER,
+        SUPPLIER,
+        INVENTORY,
+        WAREHOUSE,
+        STAFF,
+        PURCHASE_ORDER;
+
+        public static CustomFieldTab[] getAllValues() {
+            return values();
+        }
+    }
+
+    // In ModelEnums.java
+    public enum CustomFieldType {
+        INPUT,        // Manually entered
+        CALCULATED,   // Computed from other fields
+        ROLLUP;        // Aggregated from child entities
+
+        public static CustomFieldType[] getAllValues() {
+            return values();
+        }
+    }
 }

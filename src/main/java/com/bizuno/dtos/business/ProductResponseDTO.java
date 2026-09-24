@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Getter
@@ -28,4 +30,5 @@ public class ProductResponseDTO {
     private BigDecimal taxRate;
     private Integer minStock;
     private ModelEnums.ProductStatus status;
+    private List<ProductCustomFieldValueDTO> customFieldValues;
 }

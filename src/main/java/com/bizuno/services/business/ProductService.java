@@ -2,6 +2,7 @@ package com.bizuno.services.business;
 
 import com.bizuno.constants.AppConstants;
 import com.bizuno.dtos.business.CreateProductRequestDTO;
+import com.bizuno.dtos.business.ProductCustomFieldValueDTO;
 import com.bizuno.dtos.business.ProductResponseDTO;
 import com.bizuno.dtos.business.UpdateProductRequestDTO;
 import com.bizuno.dtos.main.CommonResponse;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -30,6 +32,7 @@ public class ProductService {
     private final TenantTransactionalUtil tenantTransactionalUtil;
     private final BusinessRepository businessRepository;
 
+    @Transactional
     public CommonResponse createProduct(CreateProductRequestDTO request, String businessCode, UserDO userDO) {
         Optional<Business> businessOpt = businessRepository.findByBusinessCode(businessCode);
         if (businessOpt.isEmpty()) {
@@ -42,6 +45,8 @@ public class ProductService {
             CategoryRepository categoryRepository = tenantTransactionalUtil.getRepository(entityManager, CategoryRepository.class);
             InventoryRepository inventoryRepository = tenantTransactionalUtil.getRepository(entityManager, InventoryRepository.class);
             WarehouseRepository warehouseRepository = tenantTransactionalUtil.getRepository(entityManager, WarehouseRepository.class);
+            CustomFieldRepository customFieldRepository = tenantTransactionalUtil.getRepository(entityManager, CustomFieldRepository.class);
+            ProductCustomFieldValueRepository customFieldValueRepository = tenantTransactionalUtil.getRepository(entityManager, ProductCustomFieldValueRepository.class);
 
             CommonResponse validateUser = validateUser(userDO, entityManager);
             if (validateUser.getStatus() != AppConstants.STATUS_SUCCESS) {
@@ -87,6 +92,24 @@ public class ProductService {
 
             Product savedProduct = productRepository.save(product);
 
+            if (request.getCustomFieldValues() != null && !request.getCustomFieldValues().isEmpty()) {
+                for (Map.Entry<UUID, String> entry : request.getCustomFieldValues().entrySet()) {
+                    UUID fieldId = entry.getKey();
+                    String value = entry.getValue();
+
+                    Optional<CustomField> customFieldOpt = customFieldRepository.findById(fieldId);
+                    if (customFieldOpt.isPresent()) {
+                        CustomFieldValue customFieldValue = CustomFieldValue.builder()
+                                .product(savedProduct)
+                                .customField(customFieldOpt.get())
+                                .value(value)
+                                .build();
+                        customFieldValue.prePersist();
+                        customFieldValueRepository.save(customFieldValue);
+                    }
+                }
+            }
+
             Inventory inventory = Inventory.builder()
                     .product(savedProduct)
                     .quantity(0)
@@ -96,7 +119,8 @@ public class ProductService {
             inventory.prePersist();
             inventoryRepository.save(inventory);
 
-            return new CommonResponse(AppConstants.STATUS_SUCCESS, String.format(AppConstants.MESSAGE_CREATED, "Product"), mapProductToResponse(savedProduct));
+            List<CustomFieldValue> savedCustomFieldValues = customFieldValueRepository.findByProductProductId(savedProduct.getProductId());
+            return new CommonResponse(AppConstants.STATUS_SUCCESS, String.format(AppConstants.MESSAGE_CREATED, "Product"), mapProductToResponse(savedProduct, savedCustomFieldValues));
         });
     }
 
@@ -109,6 +133,7 @@ public class ProductService {
 
         return tenantTransactionalUtil.excecuteInTenantContext(business.getTenantId(), business.getDbName(), entityManager -> {
             ProductRepository productRepository = tenantTransactionalUtil.getRepository(entityManager, ProductRepository.class);
+            ProductCustomFieldValueRepository customFieldValueRepository = tenantTransactionalUtil.getRepository(entityManager, ProductCustomFieldValueRepository.class);
 
             CommonResponse validateUser = validateUser(userDO, entityManager);
             if (validateUser.getStatus() != AppConstants.STATUS_SUCCESS) {
@@ -122,7 +147,10 @@ public class ProductService {
             Page<Product> productPage = productRepository.findAll(pageable);
 
             List<ProductResponseDTO> content = productPage.getContent().stream()
-                    .map(this::mapProductToResponse)
+                    .map(product -> {
+                        List<CustomFieldValue> customFieldValues = customFieldValueRepository.findByProductProductId(product.getProductId());
+                        return mapProductToResponse(product, customFieldValues);
+                    })
                     .collect(Collectors.toList());
 
             Map<String, Object> response = new HashMap<>();
@@ -148,6 +176,7 @@ public class ProductService {
 
         return tenantTransactionalUtil.excecuteInTenantContext(business.getTenantId(), business.getDbName(), entityManager -> {
             ProductRepository productRepository = tenantTransactionalUtil.getRepository(entityManager, ProductRepository.class);
+            ProductCustomFieldValueRepository customFieldValueRepository = tenantTransactionalUtil.getRepository(entityManager, ProductCustomFieldValueRepository.class);
 
             CommonResponse validateUser = validateUser(userDO, entityManager);
             if (validateUser.getStatus() != AppConstants.STATUS_SUCCESS) {
@@ -156,7 +185,10 @@ public class ProductService {
 
             Optional<Product> productOpt = productRepository.findById(productId);
 
-            return productOpt.map(product -> new CommonResponse(AppConstants.STATUS_SUCCESS, "Product retrieved successfully", mapProductToResponse(product)))
+            return productOpt.map(product -> {
+                List<CustomFieldValue> customFieldValues = customFieldValueRepository.findByProductProductId(productId);
+                return new CommonResponse(AppConstants.STATUS_SUCCESS, "Product retrieved successfully", mapProductToResponse(product, customFieldValues));
+            })
                     .orElseGet(() -> new CommonResponse(AppConstants.STATUS_NOT_FOUND, String.format(AppConstants.NOT_FOUND, "Product")));
         });
     }
@@ -171,6 +203,8 @@ public class ProductService {
         return tenantTransactionalUtil.excecuteInTenantContext(business.getTenantId(), business.getDbName(), entityManager -> {
             ProductRepository productRepository = tenantTransactionalUtil.getRepository(entityManager, ProductRepository.class);
             CategoryRepository categoryRepository = tenantTransactionalUtil.getRepository(entityManager, CategoryRepository.class);
+            CustomFieldRepository customFieldRepository = tenantTransactionalUtil.getRepository(entityManager, CustomFieldRepository.class);
+            ProductCustomFieldValueRepository customFieldValueRepository = tenantTransactionalUtil.getRepository(entityManager, ProductCustomFieldValueRepository.class);
 
             CommonResponse validateUser = validateUser(userDO, entityManager);
             if (validateUser.getStatus() != AppConstants.STATUS_SUCCESS) {
@@ -211,7 +245,37 @@ public class ProductService {
             product.preUpdate();
 
             Product updatedProduct = productRepository.save(product);
-            return new CommonResponse(AppConstants.STATUS_SUCCESS, String.format(AppConstants.MESSAGE_UPDATED_SUCCESS, "Product"), mapProductToResponse(updatedProduct));
+
+            if (request.getCustomFieldValues() != null) {
+                for (Map.Entry<UUID, String> entry : request.getCustomFieldValues().entrySet()) {
+                    UUID fieldId = entry.getKey();
+                    String value = entry.getValue();
+
+                    Optional<CustomField> customFieldOpt = customFieldRepository.findById(fieldId);
+                    if (customFieldOpt.isPresent()) {
+                        Optional<CustomFieldValue> existingValueOpt = customFieldValueRepository
+                                .findByProductProductIdAndCustomFieldFieldId(productId, fieldId);
+
+                        if (existingValueOpt.isPresent()) {
+                            CustomFieldValue existingValue = existingValueOpt.get();
+                            existingValue.setValue(value);
+                            existingValue.preUpdate();
+                            customFieldValueRepository.save(existingValue);
+                        } else {
+                            CustomFieldValue customFieldValue = CustomFieldValue.builder()
+                                    .product(updatedProduct)
+                                    .customField(customFieldOpt.get())
+                                    .value(value)
+                                    .build();
+                            customFieldValue.prePersist();
+                            customFieldValueRepository.save(customFieldValue);
+                        }
+                    }
+                }
+            }
+
+            List<CustomFieldValue> savedCustomFieldValues = customFieldValueRepository.findByProductProductId(updatedProduct.getProductId());
+            return new CommonResponse(AppConstants.STATUS_SUCCESS, String.format(AppConstants.MESSAGE_UPDATED_SUCCESS, "Product"), mapProductToResponse(updatedProduct, savedCustomFieldValues));
         });
     }
 
@@ -241,6 +305,24 @@ public class ProductService {
     }
 
     private ProductResponseDTO mapProductToResponse(Product product) {
+        return mapProductToResponse(product, null);
+    }
+
+    private ProductResponseDTO mapProductToResponse(Product product, List<CustomFieldValue> customFieldValues) {
+        List<ProductCustomFieldValueDTO> customFieldValueDTOs = null;
+        if (customFieldValues != null && !customFieldValues.isEmpty()) {
+            customFieldValueDTOs = customFieldValues.stream()
+                    .map(value -> ProductCustomFieldValueDTO.builder()
+                            .valueId(value.getValueId())
+                            .productId(value.getProduct() != null ? value.getProduct().getProductId() : null)
+                            .customFieldId(value.getCustomField() != null ? value.getCustomField().getFieldId() : null)
+                            .fieldKey(value.getCustomField() != null ? value.getCustomField().getFieldKey() : null)
+                            .fieldLabel(value.getCustomField() != null ? value.getCustomField().getLabel() : null)
+                            .value(value.getValue())
+                            .build())
+                    .collect(Collectors.toList());
+        }
+
         return ProductResponseDTO.builder()
                 .productId(product.getProductId())
                 .categoryId(product.getCategory() != null ? product.getCategory().getCategoryId() : null)
@@ -254,6 +336,7 @@ public class ProductService {
                 .taxRate(product.getTaxRate())
                 .minStock(product.getMinStock())
                 .status(product.getStatus())
+                .customFieldValues(customFieldValueDTOs)
                 .build();
     }
 

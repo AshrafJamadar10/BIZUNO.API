@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.Map;
 import java.util.UUID;
 
 @Setter
@@ -46,4 +47,6 @@ public class UpdateProductRequestDTO {
 
     @NotNull(message = "Status is required")
     private ModelEnums.ProductStatus status;
+
+    private Map<UUID, String> customFieldValues;
 }
